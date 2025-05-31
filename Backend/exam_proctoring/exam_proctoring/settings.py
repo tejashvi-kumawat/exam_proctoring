@@ -96,6 +96,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+CSRF_TRUSTED_ORIGINS = [
+    "https://exam-proctoring-ilwz.onrender.com/",
+]
 
 # Media and Static Files
 MEDIA_URL = '/media/'

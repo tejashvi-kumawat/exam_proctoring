@@ -11,16 +11,58 @@ from .serializers import (
     SubmitAnswerSerializer, AnswerSerializer
 )
 
+# backend/exam_app/views.py (update ExamListView)
 class ExamListView(generics.ListAPIView):
     serializer_class = ExamSerializer
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        return Exam.objects.filter(
-            is_active=True,
-            start_time__lte=timezone.now(),
-            end_time__gte=timezone.now()
-        )
+        try:
+            now = timezone.now()
+            
+            # More lenient filtering - show exams that are active and not ended
+            exams = Exam.objects.filter(
+                is_active=True,
+                end_time__gte=now  # Only check that exam hasn't ended
+            ).select_related('subject').prefetch_related('questions__options')
+            
+            print(f"Current time: {now}")
+            print(f"Total exams in DB: {Exam.objects.count()}")
+            print(f"Active exams (not ended): {exams.count()}")
+            
+            for exam in exams:
+                print(f"Exam: {exam.title}")
+                print(f"  - Created by: {exam.created_by}")
+                print(f"  - Start: {exam.start_time}")
+                print(f"  - End: {exam.end_time}")
+                print(f"  - Is Active: {exam.is_active}")
+                print(f"  - Questions: {exam.questions.count()}")
+                print(f"  - Available: {exam.start_time <= now <= exam.end_time}")
+            
+            return exams
+        except Exception as e:
+            print(f"Error in ExamListView: {e}")
+            import traceback
+            traceback.print_exc()
+            return Exam.objects.none()
+    
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            
+            print(f"Serialized {len(serializer.data)} exams")
+            for exam_data in serializer.data:
+                print(f"Returning exam: {exam_data['title']} - Questions: {len(exam_data.get('questions', []))}")
+            
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Error in ExamListView.list: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response([], status=status.HTTP_200_OK)
+
+
 
 class ExamDetailView(generics.RetrieveAPIView):
     serializer_class = ShuffledExamSerializer

@@ -29,6 +29,7 @@ class SubjectListCreateView(generics.ListCreateAPIView):
             return Subject.objects.all()
         return Subject.objects.none()
 
+# backend/exam_app/admin_views.py (update ExamAdminListCreateView)
 class ExamAdminListCreateView(generics.ListCreateAPIView):
     queryset = Exam.objects.all()
     serializer_class = ExamSerializer
@@ -39,13 +40,69 @@ class ExamAdminListCreateView(generics.ListCreateAPIView):
             return Exam.objects.all().order_by('-created_at')
         return Exam.objects.none()
     
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
         try:
-            serializer.save(created_by=self.request.user)
+            print(f"Creating exam with data: {request.data}")
+            
+            # Validate that subject exists
+            subject_id = request.data.get('subject')
+            if not subject_id:
+                return Response(
+                    {'error': 'Subject is required'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            try:
+                subject = Subject.objects.get(id=subject_id)
+                print(f"Found subject: {subject.name}")
+            except Subject.DoesNotExist:
+                return Response(
+                    {'error': 'Invalid subject selected'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Ensure datetime fields are properly formatted
+            exam_data = request.data.copy()
+            
+            # Convert datetime strings to proper datetime objects if needed
+            if 'start_time' in exam_data and isinstance(exam_data['start_time'], str):
+                try:
+                    from datetime import datetime
+                    exam_data['start_time'] = datetime.fromisoformat(exam_data['start_time'].replace('T', ' '))
+                except:
+                    pass
+            
+            if 'end_time' in exam_data and isinstance(exam_data['end_time'], str):
+                try:
+                    from datetime import datetime
+                    exam_data['end_time'] = datetime.fromisoformat(exam_data['end_time'].replace('T', ' '))
+                except:
+                    pass
+            
+            serializer = self.get_serializer(data=exam_data)
+            if serializer.is_valid():
+                exam = serializer.save(created_by=request.user)
+                print(f"Created exam: {exam.title} (ID: {exam.id})")
+                print(f"Exam details: Active={exam.is_active}, Start={exam.start_time}, End={exam.end_time}")
+                
+                # Clear any potential cache
+                from django.core.cache import cache
+                cache.clear()
+                
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                print(f"Serializer errors: {serializer.errors}")
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                
         except Exception as e:
             print(f"Error creating exam: {e}")
-            print(traceback.format_exc())
-            raise
+            import traceback
+            traceback.print_exc()
+            return Response(
+                {'error': f'Internal server error: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -402,3 +459,67 @@ def live_attempts(request, exam_id):
     except Exception as e:
         print(f"Error in live_attempts: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# backend/exam_app/admin_views.py (update create method)
+def create(self, request, *args, **kwargs):
+    try:
+        print(f"Creating exam with data: {request.data}")
+        
+        # Validate that subject exists
+        subject_id = request.data.get('subject')
+        if not subject_id:
+            return Response(
+                {'error': 'Subject is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            subject = Subject.objects.get(id=subject_id)
+            print(f"Found subject: {subject.name}")
+        except Subject.DoesNotExist:
+            return Response(
+                {'error': 'Invalid subject selected'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Handle datetime conversion
+        exam_data = request.data.copy()
+        
+        # Parse datetime strings properly
+        if 'start_time' in exam_data:
+            try:
+                from dateutil import parser
+                start_time = parser.parse(exam_data['start_time'])
+                exam_data['start_time'] = start_time
+                print(f"Parsed start time: {start_time}")
+            except Exception as e:
+                print(f"Error parsing start_time: {e}")
+        
+        if 'end_time' in exam_data:
+            try:
+                from dateutil import parser
+                end_time = parser.parse(exam_data['end_time'])
+                exam_data['end_time'] = end_time
+                print(f"Parsed end time: {end_time}")
+            except Exception as e:
+                print(f"Error parsing end_time: {e}")
+        
+        serializer = self.get_serializer(data=exam_data)
+        if serializer.is_valid():
+            exam = serializer.save(created_by=request.user)
+            print(f"Created exam: {exam.title} (ID: {exam.id})")
+            print(f"Exam details: Active={exam.is_active}, Start={exam.start_time}, End={exam.end_time}")
+            
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            print(f"Serializer errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+    except Exception as e:
+        print(f"Error creating exam: {e}")
+        import traceback
+        traceback.print_exc()
+        return Response(
+            {'error': f'Internal server error: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

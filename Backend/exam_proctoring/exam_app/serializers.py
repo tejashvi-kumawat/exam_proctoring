@@ -6,7 +6,7 @@ import random
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
-        fields = ['id', 'option_text', 'order']
+        fields = ['id', 'option_text', 'order','is_correct']
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -27,15 +27,21 @@ class QuestionSerializer(serializers.ModelSerializer):
 class ExamSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True, read_only=True)
     subject_name = serializers.CharField(source='subject.name', read_only=True)
+    questions_count = serializers.SerializerMethodField()
     
     class Meta:
         model = Exam
-        fields = ['id', 'title', 'subject', 'subject_name', 'description', 'duration_minutes', 
-                 'total_marks', 'passing_marks', 'start_time', 'end_time', 'questions',
-                 'shuffle_questions', 'shuffle_options', 'is_active']  # Added missing fields
+        fields = [
+            'id', 'title', 'subject', 'subject_name', 'description', 
+            'duration_minutes', 'total_marks', 'passing_marks', 
+            'start_time', 'end_time', 'questions', 'questions_count',
+            'shuffle_questions', 'shuffle_options', 'is_active', 'created_at'
+        ]
+    
+    def get_questions_count(self, obj):
+        return obj.questions.count()
     
     def validate(self, data):
-        """Custom validation"""
         if data.get('passing_marks', 0) >= data.get('total_marks', 0):
             raise serializers.ValidationError("Passing marks must be less than total marks")
         
@@ -44,6 +50,7 @@ class ExamSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("End time must be after start time")
         
         return data
+
 
 
 class ShuffledExamSerializer(serializers.ModelSerializer):

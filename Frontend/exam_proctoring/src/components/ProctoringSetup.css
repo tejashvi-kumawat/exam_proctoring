@@ -1,0 +1,238 @@
+/* frontend/src/components/ProctoringSetup.css */
+.proctoring-setup {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  width: 100vw;
+}
+
+.setup-container {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 800px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.setup-container h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.setup-container > p {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.setup-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.setup-step {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.setup-step.completed {
+  border-color: #4caf50;
+  background-color: #f8fff8;
+}
+
+.setup-step h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.camera-preview {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.preview-video {
+  width: 300px;
+  height: 200px;
+  border-radius: 8px;
+  background: #000;
+}
+
+.face-detection-indicator {
+  font-weight: bold;
+}
+
+.face-detection-indicator .detected {
+  color: #4caf50;
+}
+
+.face-detection-indicator .not-detected {
+  color: #f44336;
+}
+
+.audio-level-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.audio-level-bar {
+  flex: 1;
+  height: 20px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.audio-level-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336);
+  transition: width 0.1s ease;
+}
+
+.audio-level-text {
+  font-weight: bold;
+  min-width: 120px;
+}
+
+.instructions-list {
+  list-style: none;
+  padding: 0;
+}
+
+.instructions-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.instructions-list li:before {
+  content: "✓ ";
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.setup-actions {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: #2196f3;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #1976d2;
+}
+
+.btn-success {
+  background: #4caf50;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #45a049;
+}
+
+.btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #f44336;
+  font-weight: bold;
+  margin-top: 10px;
+
+}
+
+/* Add to frontend/src/components/ProctoringSetup.css */
+
+.debug-info {
+  background: #f0f8ff;
+  border: 1px solid #b0d4f1;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #2c5aa0;
+}
+
+.detection-status {
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 6px;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.detection-status.detected {
+  background: #e8f5e8;
+  color: #2e7d32;
+  border: 1px solid #4caf50;
+}
+
+.detection-status.not-detected {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #f44336;
+}
+
+.detection-tips {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.detection-tips h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.detection-tips ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.detection-tips li {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.preview-video {
+  width: 100%;
+  max-width: 400px;
+  height: 250px;
+  border-radius: 12px;
+  background: #000;
+  object-fit: cover;
+  border: 3px solid #e0e0e0;
+}
+
+.setup-step.completed .preview-video {
+  border-color: #4caf50;
+}

@@ -1,0 +1,127 @@
+/* frontend/src/components/CreateExam.css */
+.create-exam {
+  min-height: 100vh;
+  width: 100vw;
+  background: var(--gray-100);
+  padding: var(--spacing-lg);
+}
+
+.create-exam-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.create-exam-header h1 {
+  color: var(--dark-color);
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.create-exam-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.exam-form {
+  background: white;
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow);
+}
+
+.form-section {
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.form-section h2 {
+  color: var(--dark-color);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-xl);
+}
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--border-radius-sm);
+  position: relative;
+  transition: all var(--transition-base);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--gray-200);
+}
+
+@media (max-width: 640px) {
+  .create-exam {
+    padding: var(--spacing-md);
+  }
+  
+  .create-exam-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .exam-form {
+    padding: var(--spacing-lg);
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .checkbox-group {
+    gap: var(--spacing-lg);
+  }
+}

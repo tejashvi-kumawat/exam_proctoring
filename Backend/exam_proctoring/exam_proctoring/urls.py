@@ -9,7 +9,7 @@ def my_html_view(request):
     return HttpResponse(html_content)
     
 urlpatterns = [
-    path('/', my_html_view, name='html_view'),
+    path('', my_html_view),
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
     path('api/exam/', include('exam_app.urls')),

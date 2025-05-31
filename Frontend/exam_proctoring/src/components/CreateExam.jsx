@@ -69,26 +69,55 @@ const CreateExam = () => {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
+// frontend/src/components/CreateExam.jsx (update handleSubmit)
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  const validationErrors = validateForm();
+  if (Object.keys(validationErrors).length > 0) {
+    setErrors(validationErrors);
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const response = await api.post('/exam/admin/exams/', examForm);
-      navigate(`/admin/questions?examId=${response.data.id}`);
-    } catch (error) {
-      console.error('Error creating exam:', error);
+  setLoading(true);
+  try {
+    // Convert datetime-local to proper ISO format
+    const startTime = new Date(examForm.start_time);
+    const endTime = new Date(examForm.end_time);
+    
+    // Debug: Log the times being sent
+    console.log('Sending exam with times:', {
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      current_time: new Date().toISOString()
+    });
+    
+    const examData = {
+      ...examForm,
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      subject: parseInt(examForm.subject),
+      duration_minutes: parseInt(examForm.duration_minutes),
+      total_marks: parseInt(examForm.total_marks),
+      passing_marks: parseInt(examForm.passing_marks)
+    };
+    
+    const response = await api.post('/exam/admin/exams/', examData);
+    console.log('Exam created successfully:', response.data);
+    navigate(`/admin/questions?examId=${response.data.id}`);
+  } catch (error) {
+    console.error('Error creating exam:', error);
+    if (error.response?.data) {
+      console.error('Error details:', error.response.data);
+      setErrors({ general: JSON.stringify(error.response.data) });
+    } else {
       setErrors({ general: 'Failed to create exam. Please try again.' });
-    } finally {
-      setLoading(false);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="create-exam">

@@ -17,37 +17,81 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      // Fetch exams and user stats in parallel
-      const [examsResponse, statsResponse] = await Promise.all([
-        api.get('/exam/exams/').catch(err => {
-          console.error('Error fetching exams:', err);
-          return { data: [] };
-        }),
-        api.get('/auth/stats/').catch(err => {
-          console.error('Error fetching stats:', err);
-          return { data: { total_attempts: 0, completed_exams: 0, average_score: 0, total_score: 0 } };
-        })
-      ]);
-      
-      console.log('Exams response:', examsResponse.data);
-      console.log('Stats response:', statsResponse.data);
-      
-      setExams(examsResponse.data || []);
-      setUserStats(statsResponse.data || {});
-      
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      setError('Failed to load dashboard data. Please refresh the page.');
-    } finally {
-      setLoading(false);
+// frontend/src/components/Dashboard.jsx (update fetchDashboardData)
+const fetchDashboardData = async () => {
+  try {
+    setLoading(true);
+    setError('');
+    
+    console.log('Fetching dashboard data...');
+    
+    // Add cache-busting parameter
+    const timestamp = new Date().getTime();
+    
+    // Fetch exams and user stats in parallel
+    const [examsResponse, statsResponse] = await Promise.all([
+      api.get(`/exam/exams/?t=${timestamp}`).catch(err => {
+        console.error('Error fetching exams:', err);
+        console.error('Error response:', err.response);
+        return { data: [] };
+      }),
+      api.get('/auth/stats/').catch(err => {
+        console.error('Error fetching stats:', err);
+        return { data: { total_attempts: 0, completed_exams: 0, average_score: 0, total_score: 0 } };
+      })
+    ]);
+    
+    console.log('Exams response:', examsResponse);
+    console.log('Exams data:', examsResponse.data);
+    
+    // Check if exams have questions
+    if (examsResponse.data && examsResponse.data.length > 0) {
+      examsResponse.data.forEach((exam, index) => {
+        console.log(`Exam ${index + 1}:`, {
+          id: exam.id,
+          title: exam.title,
+          created_by: exam.created_by,
+          start_time: exam.start_time,
+          end_time: exam.end_time,
+          is_active: exam.is_active,
+          questionsLength: exam.questions?.length || 0
+        });
+      });
+    } else {
+      console.log('No exams found in response');
     }
-  };
+    
+    setExams(examsResponse.data || []);
+    setUserStats(statsResponse.data || {});
+    
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    setError('Failed to load dashboard data. Please refresh the page.');
+  } finally {
+    setLoading(false);
+  }
+};
 
+
+const debugExamData = () => {
+  console.log('=== EXAM DEBUG INFO ===');
+  console.log('Current exams state:', exams);
+  console.log('Exams length:', exams.length);
+  
+  exams.forEach((exam, index) => {
+    console.log(`Exam ${index + 1}:`, {
+      id: exam.id,
+      title: exam.title,
+      questions: exam.questions,
+      questions_count: exam.questions_count,
+      questionsLength: exam.questions?.length,
+      subject_name: exam.subject_name,
+      start_time: exam.start_time,
+      end_time: exam.end_time,
+      is_active: exam.is_active
+    });
+  });
+};
   const handleStartExam = (examId) => {
     navigate(`/exam/${examId}/setup`);
   };
@@ -100,6 +144,9 @@ const Dashboard = () => {
             {error}
             <button onClick={fetchDashboardData} className="btn btn-sm btn-primary" style={{marginLeft: '10px'}}>
               Retry
+            </button>
+            <button onClick={debugExamData} className="btn btn-secondary" style={{margin: '10px'}}>
+              Debug Exam Data
             </button>
           </div>
         )}
@@ -166,7 +213,9 @@ const Dashboard = () => {
                       </div>
                       <div className="info-item">
                         <span className="label">Questions:</span>
-                        <span className="value">{exam.questions?.length || 0}</span>
+                        <span className="value">
+                          {exam.questions?.length || exam.questions_count || 0}
+                        </span>
                       </div>
                     </div>
                     

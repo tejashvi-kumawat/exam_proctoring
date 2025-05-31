@@ -97,7 +97,7 @@ REST_FRAMEWORK = {
     ],
 }
 CSRF_TRUSTED_ORIGINS = [
-    "https://exam-proctoring-ilwz.onrender.com/",
+    "https://exam-proctoring-ilwz.onrender.com",
 ]
 
 # Media and Static Files

@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='your-secret-key-here')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', "*"]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', "*", "https://exam-proctoring-ilwz.onrender.com"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -81,6 +81,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://exam-proctoring.vercel.app",
+    "https://exam-proctoring-ilwz.onrender.com"
 ]
 
 CORS_ALLOW_CREDENTIALS = True

@@ -76,28 +76,37 @@ const Register = () => {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
+// frontend/src/components/Register.jsx (update handleSubmit)
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  const validationErrors = validateForm();
+  if (Object.keys(validationErrors).length > 0) {
+    setErrors(validationErrors);
+    return;
+  }
 
-    setLoading(true);
-    setErrors({});
+  setLoading(true);
+  setErrors({});
 
-    const result = await register(formData);
-    
-    if (result.success) {
-      navigate('/dashboard');
+  const result = await register(formData);
+  
+  if (result.success) {
+    if (result.approval_status === 'pending') {
+      // Show approval pending message
+      alert('Registration successful! Your instructor request has been submitted for admin approval. You will be notified once approved.');
+      navigate('/login');
     } else {
-      setErrors({ general: result.error });
+      // Regular student registration
+      navigate('/dashboard');
     }
-    
-    setLoading(false);
-  };
+  } else {
+    setErrors({ general: result.error });
+  }
+  
+  setLoading(false);
+};
+
 
   return (
     <div className="register-container">

@@ -14,4 +14,3 @@ python-decouple==3.8
 pytz==2025.2
 redis==6.2.0
 sqlparse==0.5.3
-pillow==11.2.1

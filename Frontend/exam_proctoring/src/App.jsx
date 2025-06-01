@@ -18,6 +18,7 @@ import Reports from './components/Reports';
 import AttemptDetails from './components/AttemptDetails';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
+import InstructorApproval from './components/InstructorApproval';
 import './App.css';
 
 function App() {
@@ -57,6 +58,11 @@ function App() {
               <Route path="/admin" element={
                 <AdminRoute>
                   <AdminPanel />
+                </AdminRoute>
+              } />
+              <Route path="/admin/instructor-approval" element={
+                <AdminRoute>
+                  <InstructorApproval />
                 </AdminRoute>
               } />
               <Route path="/admin/questions" element={

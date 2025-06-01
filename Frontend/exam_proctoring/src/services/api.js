@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://exam-proctoring-ilwz.onrender.com/api',
+  baseURL: 'http://localhost:8000/api',  // Make sure this matches your Django server
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,6 +15,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Token ${token}`;
     }
+    // console.log('Making request to:', config.baseURL + config.url); // Debug log
     return config;
   },
   (error) => {
@@ -26,6 +27,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', error.response?.status, error.response?.data);
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';

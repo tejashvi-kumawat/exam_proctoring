@@ -57,6 +57,12 @@ const AdminPanel = () => {
             >
               Manage Questions
             </button>
+            <button 
+              onClick={() => navigate('/admin/instructor-approval')}
+              className="btn btn-primary"
+            >
+              Instructor Approval
+            </button>
             
             <button 
               onClick={() => navigate('/admin/monitor')}

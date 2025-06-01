@@ -1,4 +1,4 @@
-# backend/authentication/models.py (update existing)
+# backend/authentication/models.py (update CustomUser)
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -8,10 +8,18 @@ class CustomUser(AbstractUser):
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     is_student = models.BooleanField(default=True)
     is_instructor = models.BooleanField(default=False)
+    
+    # Add approval fields
+    instructor_approved = models.BooleanField(default=False)
+    approval_requested = models.BooleanField(default=False)
+    approval_requested_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_instructors')
+    approved_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True, null=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # Add related_name to avoid conflicts
     groups = models.ManyToManyField(
         'auth.Group',
         verbose_name='groups',
@@ -31,6 +39,17 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+    @property
+    def approval_status(self):
+        if self.is_instructor and self.instructor_approved:
+            return 'approved'
+        elif self.approval_requested and not self.instructor_approved:
+            return 'pending'
+        elif self.rejection_reason:
+            return 'rejected'
+        return 'none'
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')

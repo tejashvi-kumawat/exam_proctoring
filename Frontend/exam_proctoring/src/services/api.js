@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',  // Make sure this matches your Django server
+  baseURL: 'https://exam-proctoring-ilwz.onrender.com/api',  // Make sure this matches your Django server
   headers: {
     'Content-Type': 'application/json',
   },

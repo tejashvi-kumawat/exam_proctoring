@@ -91,6 +91,11 @@ const AttemptDetails = () => {
   };
 
   const handleMarkAnswer = async (answerId) => {
+    if (!answerId) {
+      showError('Cannot mark an unanswered question. Student did not submit any answer.');
+      return;
+    }
+    
     if (!marksInput || marksInput === '') {
       showError('Please enter marks');
       return;
@@ -568,7 +573,12 @@ const AttemptDetails = () => {
                       <Icon name="Award" size={18} style={{ marginRight: 8, verticalAlign: 'middle' }} />
                       Marks
                     </h5>
-                    {markingAnswer === currentAnswer.id ? (
+                    {!currentAnswer.id ? (
+                      <div style={{ padding: '12px', background: '#f3f4f6', borderRadius: '6px', color: '#6b7280', fontSize: '14px' }}>
+                        <Icon name="AlertCircle" size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                        Question not answered - no marks to award
+                      </div>
+                    ) : markingAnswer === currentAnswer.id ? (
                       <div className="marking-input-group-attempt">
                         <input
                           type="number"
@@ -626,7 +636,12 @@ const AttemptDetails = () => {
                       Solution
                     </h5>
                     
-                    {editingSolutionFor === currentAnswer.id ? (
+                    {!currentAnswer.id ? (
+                      <div style={{ padding: '12px', background: '#f3f4f6', borderRadius: '6px', color: '#6b7280', fontSize: '14px' }}>
+                        <Icon name="AlertCircle" size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                        Solutions can only be added for answered questions
+                      </div>
+                    ) : editingSolutionFor === currentAnswer.id ? (
                     <div className="solution-editor-form-attempt">
                       <textarea 
                         value={editingSolutionText} 

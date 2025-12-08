@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Use environment variable or fallback to PythonAnywhere backend
-const API_URL = import.meta.env.VITE_API_URL || 'https://exam0proctoring.pythonanywhere.com/api/';
+const API_URL = import.meta.env.VITE_API_URL || 'https://exam0proctoring.pythonanywhere.com/api';
 
 const api = axios.create({
   baseURL: API_URL,

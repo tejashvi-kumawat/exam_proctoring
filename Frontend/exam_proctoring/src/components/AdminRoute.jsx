@@ -15,8 +15,13 @@ const AdminRoute = ({ children }) => {
     );
   }
 
-  // Check if user is admin or instructor
-  if (!user || (!user.is_staff && !user.is_instructor)) {
+  // Check if user is staff OR approved instructor
+  const isAuthorized = user && (
+    user.is_staff || 
+    (user.is_instructor && user.instructor_approved)
+  );
+  
+  if (!isAuthorized) {
     return <Navigate to="/dashboard" />;
   }
 

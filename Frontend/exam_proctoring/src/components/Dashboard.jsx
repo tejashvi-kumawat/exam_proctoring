@@ -106,13 +106,13 @@ const Dashboard = () => {
           </span>
         </div>
         <div className="header-right">
-          {(user?.is_staff || user?.is_instructor) && (
+          {(user?.is_staff || (user?.is_instructor && user?.instructor_approved)) && (
             <button 
               onClick={() => navigate('/admin')}
               className="btn btn-sm btn-primary"
             >
               <Icon name="Settings" size={16} />
-              Admin
+              Admin Panel
             </button>
           )}
           <button 

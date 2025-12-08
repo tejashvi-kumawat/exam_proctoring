@@ -18,8 +18,11 @@ User = get_user_model()
 # Remove the SubjectSerializer class definition from here
 
 def is_admin_user(user):
-    """Check if user has admin privileges"""
-    return user.is_staff or getattr(user, 'is_instructor', False)
+    """Check if user has admin privileges - must be staff OR approved instructor"""
+    return user.is_staff or (
+        getattr(user, 'is_instructor', False) and 
+        getattr(user, 'instructor_approved', False)
+    )
 
 class SubjectListCreateView(generics.ListCreateAPIView):
     queryset = Subject.objects.all()

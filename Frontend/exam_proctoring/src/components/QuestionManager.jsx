@@ -204,7 +204,10 @@ const saveQuestion = async () => {
       formData.append('question_text', questionForm.question_text.trim());
       formData.append('question_type', questionForm.question_type);
       formData.append('marks', parseInt(questionForm.marks));
-      formData.append('order', questions.length);
+      // Only set order for NEW questions, preserve order for editing
+      if (!editingQuestion) {
+        formData.append('order', questions.length);
+      }
       
       if (hasQuestionImage) {
         formData.append('question_image', questionForm.question_image);
@@ -242,12 +245,16 @@ const saveQuestion = async () => {
         question_text: questionForm.question_text.trim(),
         question_type: questionForm.question_type,
         marks: parseInt(questionForm.marks),
-        order: questions.length,
         options: questionForm.options.filter(opt => opt.option_text.trim()).map(opt => ({
           option_text: opt.option_text.trim(),
           is_correct: opt.is_correct
         }))
       };
+      
+      // Only set order for NEW questions, preserve order for editing
+      if (!editingQuestion) {
+        questionData.order = questions.length;
+      }
       
       console.log('Sending question data:', questionData);
       

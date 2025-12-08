@@ -25,6 +25,7 @@ const QuestionManager = () => {
   const [subjects, setSubjects] = useState([]);
   const [draggedQuestion, setDraggedQuestion] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const [questionForm, setQuestionForm] = useState({
     question_text: '',

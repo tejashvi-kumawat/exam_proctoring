@@ -468,6 +468,26 @@ const saveQuestion = async () => {
     }
   };
 
+  const handleDeleteAllQuestions = async () => {
+    if (!selectedExam) return;
+    
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ALL ${questions.length} questions from "${selectedExam.title}"?\n\nThis action cannot be undone!`
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+      await api.delete(`/exam/admin/exams/${selectedExam.id}/delete-all-questions/`);
+      toast.success(`All questions deleted from "${selectedExam.title}"`);
+      fetchQuestions(selectedExam.id);
+      fetchExams(); // Refresh exam stats
+    } catch (error) {
+      console.error('Error deleting all questions:', error);
+      toast.error(error.response?.data?.error || 'Failed to delete questions');
+    }
+  };
+
   return (
     <div className="question-manager">
       <Breadcrumbs items={[
@@ -628,6 +648,16 @@ const saveQuestion = async () => {
                           }}
                         />
                       </label>
+                    {questions.length > 0 && (
+                      <button 
+                        onClick={handleDeleteAllQuestions}
+                        className="btn btn-danger"
+                        title="Delete all questions"
+                      >
+                        <Icon name="Trash2" size={18} style={{ marginRight: '8px' }} />
+                        Delete All
+                      </button>
+                    )}
                     <button 
                       onClick={() => setShowAddQuestion(true)}
                       className="btn btn-primary"

@@ -175,6 +175,27 @@ const AttemptDetails = () => {
     }
   };
 
+  const handleDeleteSolutions = async () => {
+    const confirmed = await confirm(
+      'Delete all solution files (images/attachments)?\n\nThis will permanently delete uploaded files but keep text answers and marks. Cannot be undone!'
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.delete(`/exam/admin/attempts/${attemptId}/delete-solutions/`);
+      showSuccess(`Deleted ${response.data.deleted_counts.images} images and ${response.data.deleted_counts.attachments} attachments`);
+      // Refresh attempt details to update UI
+      fetchAttemptDetails();
+    } catch (error) {
+      showError(error.response?.data?.error || 'Failed to delete solutions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   
 
   const getAnswerStatus = (answer) => {
@@ -276,13 +297,23 @@ const AttemptDetails = () => {
             </button>
           )}
           {(attempt.status === 'COMPLETED' || attempt.status === 'IN_PROGRESS' || attempt.status === 'PAUSED') && (
-            <button
-              onClick={handleRestartExam}
-              className="btn btn-sm btn-secondary"
-            >
-              <Icon name="RotateCcw" size={16} />
-              Restart
-            </button>
+            <>
+              <button
+                onClick={handleDeleteSolutions}
+                className="btn btn-sm btn-danger"
+                title="Delete solution files (images/attachments)"
+              >
+                <Icon name="FileX" size={16} />
+                Delete Files
+              </button>
+              <button
+                onClick={handleRestartExam}
+                className="btn btn-sm btn-secondary"
+              >
+                <Icon name="RotateCcw" size={16} />
+                Restart
+              </button>
+            </>
           )}
         </div>
       </div>

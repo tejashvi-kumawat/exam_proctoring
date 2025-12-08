@@ -449,7 +449,15 @@ def manage_question(request, question_id):
         question = get_object_or_404(Question, id=question_id)
         
         if request.method == 'PUT':
-            serializer = QuestionSerializer(question, data=request.data)
+            # Preserve the original order if not explicitly provided
+            original_order = question.order
+            data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+            
+            # If order is not in the request, use the original order
+            if 'order' not in data:
+                data['order'] = original_order
+            
+            serializer = QuestionSerializer(question, data=data, partial=True)
             if serializer.is_valid():
                 question = serializer.save()
                 
@@ -997,49 +1005,6 @@ def create(self, request, *args, **kwargs):
         )
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def restart_exam_attempt(request, attempt_id):
-    """Admin endpoint to restart a paused/terminated exam attempt"""
-    try:
-        if not is_admin_user(request.user):
-            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-        
-        attempt = get_object_or_404(ExamAttempt, id=attempt_id)
-        
-        # Only allow restarting paused or terminated exams
-        if attempt.status not in ['PAUSED', 'TERMINATED']:
-            return Response(
-                {'error': f'Cannot restart exam with status: {attempt.status}'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        attempt.status = 'IN_PROGRESS'
-        attempt.save()
-        
-        # Log activity
-        ExamActivityLog.objects.create(
-            attempt=attempt,
-            activity_type='EXAM_STARTED',
-            description=f'Exam restarted by admin {request.user.username}',
-            metadata={'reason': 'admin_restart', 'admin_user': request.user.username},
-            ip_address=get_client_ip(request)
-        )
-        
-        return Response({
-            'message': 'Exam restarted successfully',
-            'status': 'IN_PROGRESS',
-            'attempt': ExamAttemptSerializer(attempt).data
-        })
-        
-    except Exception as e:
-        print(f"Error restarting exam: {e}")
-        import traceback
-        traceback.print_exc()
-        return Response(
-            {'error': f'Internal server error: {str(e)}'}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
 
 
 def get_client_ip(request):
@@ -1161,6 +1126,130 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR', '0.0.0.0')
     return ip
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_all_exam_questions(request, exam_id):
+    """Delete all questions of a specific exam"""
+    try:
+        if not is_admin_user(request.user):
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        exam = get_object_or_404(Exam, id=exam_id)
+        
+        # Get all questions for this exam
+        questions = Question.objects.filter(exam=exam)
+        question_count = questions.count()
+        
+        # Delete question images and option images
+        import os
+        from django.conf import settings
+        
+        for question in questions:
+            # Delete question image
+            if question.question_image:
+                file_path = os.path.join(settings.MEDIA_ROOT, question.question_image.name)
+                if os.path.exists(file_path):
+                    try:
+                        os.remove(file_path)
+                    except Exception as e:
+                        print(f"Error deleting question image {file_path}: {e}")
+            
+            # Delete option images
+            for option in question.options.all():
+                if option.option_image:
+                    file_path = os.path.join(settings.MEDIA_ROOT, option.option_image.name)
+                    if os.path.exists(file_path):
+                        try:
+                            os.remove(file_path)
+                        except Exception as e:
+                            print(f"Error deleting option image {file_path}: {e}")
+        
+        # Delete questions (CASCADE will delete options)
+        questions.delete()
+        
+        # Reset exam total marks if auto-calculate
+        if exam.auto_calculate_total:
+            exam.total_marks = 0
+            exam.save()
+        
+        return Response({
+            'message': f'Successfully deleted {question_count} questions from exam "{exam.title}"',
+            'deleted_count': question_count,
+            'exam_title': exam.title
+        })
+        
+    except Exception as e:
+        print(f"Error deleting exam questions: {e}")
+        import traceback
+        traceback.print_exc()
+        return Response(
+            {'error': f'Internal server error: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_attempt_solutions(request, attempt_id):
+    """Delete all solution files (images/attachments) for a specific attempt"""
+    try:
+        if not is_admin_user(request.user):
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        attempt = get_object_or_404(ExamAttempt, id=attempt_id)
+        
+        # Get all answers for this attempt
+        from exam_app.models import Answer, AnswerImage, AnswerAttachment
+        import os
+        
+        answers = Answer.objects.filter(attempt=attempt)
+        
+        deleted_counts = {
+            'images': 0,
+            'attachments': 0
+        }
+        
+        # Delete image files and records
+        for answer in answers:
+            # Delete answer images
+            for img in answer.answer_images.all():
+                if img.image and os.path.isfile(img.image.path):
+                    try:
+                        os.remove(img.image.path)
+                        deleted_counts['images'] += 1
+                    except Exception as e:
+                        print(f"Error deleting image {img.image.path}: {e}")
+            
+            # Delete answer attachments
+            for attachment in answer.attachments.all():
+                if attachment.file and os.path.isfile(attachment.file.path):
+                    try:
+                        os.remove(attachment.file.path)
+                        deleted_counts['attachments'] += 1
+                    except Exception as e:
+                        print(f"Error deleting attachment {attachment.file.path}: {e}")
+            
+            # Delete database records
+            answer.answer_images.all().delete()
+            answer.attachments.all().delete()
+        
+        return Response({
+            'message': f'Successfully deleted solution files for attempt #{attempt_id}',
+            'deleted_counts': deleted_counts,
+            'student': attempt.user.username,
+            'exam': attempt.exam.title
+        })
+        
+    except Exception as e:
+        print(f"Error deleting attempt solutions: {e}")
+        import traceback
+        traceback.print_exc()
+        return Response(
+            {'error': f'Internal server error: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['POST', 'PUT'])
@@ -1737,7 +1826,31 @@ def restart_exam_attempt(request, attempt_id):
         
         # Delete all answers and related data for this attempt
         from exam_app.models import Answer, AnswerImage, AnswerAttachment
-        Answer.objects.filter(attempt=attempt).delete()
+        import os
+        
+        # Get all answers for this attempt
+        answers = Answer.objects.filter(attempt=attempt)
+        
+        # Delete image files
+        for answer in answers:
+            # Delete answer images
+            for img in answer.answer_images.all():
+                if img.image and os.path.isfile(img.image.path):
+                    try:
+                        os.remove(img.image.path)
+                    except Exception as e:
+                        print(f"Error deleting image {img.image.path}: {e}")
+            
+            # Delete answer attachments
+            for attachment in answer.attachments.all():
+                if attachment.file and os.path.isfile(attachment.file.path):
+                    try:
+                        os.remove(attachment.file.path)
+                    except Exception as e:
+                        print(f"Error deleting attachment {attachment.file.path}: {e}")
+        
+        # Delete database records (CASCADE will delete related images/attachments)
+        answers.delete()
         
         # Delete the attempt record
         attempt.delete()

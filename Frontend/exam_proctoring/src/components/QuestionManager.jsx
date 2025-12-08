@@ -214,63 +214,30 @@ const saveQuestion = async () => {
         formData.append('question_image', questionForm.question_image);
       }
       
-      // Filter options properly
-      console.log('All questionForm.options:', questionForm.options); // Debug
-      
+      // BETTER APPROACH: Send options as JSON string in FormData
+      // This avoids complex FormData parsing on backend
       const validOptions = questionForm.options.filter(opt => {
-        // Check if option has any content
         const hasText = opt.option_text && opt.option_text.toString().trim().length > 0;
         const hasNewImage = opt.option_image instanceof File;
         const hasExistingImage = opt.option_image && typeof opt.option_image === 'string' && opt.option_image.length > 0;
-        
-        const isValid = hasText || hasNewImage || hasExistingImage;
-        console.log(`Option check: text="${opt.option_text}", hasText=${hasText}, hasNewImage=${hasNewImage}, hasExisting=${hasExistingImage}, valid=${isValid}`);
-        
-        return isValid;
+        return hasText || hasNewImage || hasExistingImage;
       });
       
-      console.log(`Filtered ${validOptions.length} valid options from ${questionForm.options.length} total`); // Debug log
+      // Send options metadata as JSON (text and is_correct flags)
+      const optionsMetadata = validOptions.map(opt => ({
+        option_text: opt.option_text || '',
+        is_correct: opt.is_correct,
+        has_existing_image: opt.option_image && typeof opt.option_image === 'string'
+      }));
       
-      // CRITICAL DEBUG - Show what's being sent
-      const debugData = {
-        mode: editingQuestion ? 'EDIT' : 'CREATE',
-        questionId: editingQuestion?.id,
-        totalOptions: questionForm.options.length,
-        validOptions: validOptions.length,
-        options: validOptions.map(opt => ({
-          text: opt.option_text,
-          is_correct: opt.is_correct,
-          hasImage: !!opt.option_image
-        })),
-        timestamp: new Date().toISOString()
-      };
+      formData.append('options_json', JSON.stringify(optionsMetadata));
       
-      localStorage.setItem('lastQuestionSave', JSON.stringify(debugData, null, 2));
-      console.log('=== SENDING OPTIONS TO BACKEND ===');
-      console.log(debugData);
-      console.log('==================================');
-      
+      // Send new option images separately
       validOptions.forEach((option, index) => {
-        // CRITICAL: Always send option_text even if empty string
-        const optionText = (option.option_text || '').toString();
-        formData.append(`options[${index}][option_text]`, optionText);
-        formData.append(`options[${index}][is_correct]`, option.is_correct ? 'true' : 'false');
-        
-        console.log(`FormData appending option ${index}: text="${optionText}", is_correct=${option.is_correct}`);
-        
-        // Handle option images
         if (option.option_image instanceof File) {
-          // New image file being uploaded
-          formData.append(`option_images`, option.option_image);
-          console.log(`  - Added new image for option ${index}`);
-        } else if (option.option_image && typeof option.option_image === 'string') {
-          // Existing image URL - send it so backend can preserve it
-          formData.append(`options[${index}][existing_image_url]`, option.option_image);
-          console.log(`  - Preserved existing image for option ${index}`);
+          formData.append(`option_image_${index}`, option.option_image);
         }
       });
-      
-      console.log(`Total options sent in FormData: ${validOptions.length}`);
       
       let response;
       if (editingQuestion) {

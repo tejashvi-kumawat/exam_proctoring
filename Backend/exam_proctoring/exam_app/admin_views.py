@@ -410,10 +410,20 @@ def manage_question(request, question_id):
                 # Update options
                 question.options.all().delete()  # Remove existing options
                 
-                # Parse options from both JSON and FormData formats
+                # Parse options - try multiple formats
                 options_data = request.data.get('options', [])
                 
-                # If options is empty, try parsing FormData format: options[0][option_text], etc.
+                # Try JSON string format (new cleaner approach)
+                if not options_data and 'options_json' in request.data:
+                    import json
+                    try:
+                        options_data = json.loads(request.data.get('options_json'))
+                        print(f"Parsed options from JSON string: {len(options_data)} options")
+                    except json.JSONDecodeError as e:
+                        print(f"Error parsing options_json: {e}")
+                        options_data = []
+                
+                # Fallback: Parse FormData format: options[0][option_text], etc.
                 if not options_data:
                     parsed_options = {}
                     for key in request.data.keys():
@@ -431,35 +441,44 @@ def manage_question(request, question_id):
                     # Convert dict to list
                     if parsed_options:
                         options_data = [parsed_options[i] for i in sorted(parsed_options.keys())]
+                        print(f"Parsed options from FormData keys: {len(options_data)} options")
                 
-                print(f"DEBUG: Parsed {len(options_data)} options for question {question.id}")
+                print(f"DEBUG: Total {len(options_data)} options parsed for question {question.id}")
                 for i, opt in enumerate(options_data):
                     print(f"  Option {i}: text='{opt.get('option_text')}', is_correct={opt.get('is_correct')}")
                 
-                # Get option images if any
-                option_images = request.FILES.getlist('option_images') if 'option_images' in request.FILES else []
-                
+                # Process each option
                 for i, option_data in enumerate(options_data):
                     option_text = option_data.get('option_text', '').strip()
+                    
                     # Parse is_correct - handle both boolean and string formats
                     is_correct = option_data.get('is_correct', False)
                     if isinstance(is_correct, str):
                         is_correct = is_correct.lower() in ['true', '1', 'yes']
                     
-                    # Determine option image: new upload > existing image > none
+                    # Determine option image
                     option_image = None
-                    if i < len(option_images):
-                        # New image uploaded for this option
-                        option_image = option_images[i]
-                    elif option_data.get('existing_image_url'):
-                        # Keep existing image (already stored before deletion)
-                        if i in existing_option_images:
-                            option_image = existing_option_images[i]
                     
-                    # Create option if it has text (after stripping) OR an image
-                    # Use len() check to be explicit, not truthiness
+                    # Check for new image with index-based key (option_image_0, option_image_1, etc.)
+                    image_key = f'option_image_{i}'
+                    if image_key in request.FILES:
+                        option_image = request.FILES[image_key]
+                        print(f"  - New image uploaded for option {i}")
+                    # Check if we should preserve existing image
+                    elif option_data.get('has_existing_image') and i in existing_option_images:
+                        option_image = existing_option_images[i]
+                        print(f"  - Preserving existing image for option {i}")
+                    # Fallback: old format with option_images list
+                    elif 'option_images' in request.FILES:
+                        option_images_list = request.FILES.getlist('option_images')
+                        if i < len(option_images_list):
+                            option_image = option_images_list[i]
+                    
+                    # Create option if it has ANY content
                     has_text = len(option_text) > 0
                     has_image = option_image is not None
+                    
+                    print(f"  - Creating option {i}: text='{option_text[:30]}...', is_correct={is_correct}, has_image={has_image}")
                     
                     if has_text or has_image:
                         Option.objects.create(

@@ -23,6 +23,8 @@ const QuestionManager = () => {
   const [showEditExamModal, setShowEditExamModal] = useState(false);
   const [deleteExamConfirm, setDeleteExamConfirm] = useState({ isOpen: false, examId: null });
   const [subjects, setSubjects] = useState([]);
+  const [draggedQuestion, setDraggedQuestion] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
 
   const [questionForm, setQuestionForm] = useState({
     question_text: '',
@@ -337,6 +339,77 @@ const saveQuestion = async () => {
     setShowAddQuestion(false);
   };
 
+  // Drag and Drop handlers
+  const handleDragStart = (e, question, index) => {
+    setDraggedQuestion({ question, index });
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', e.currentTarget);
+    // Add slight opacity to dragged item
+    setTimeout(() => {
+      e.target.style.opacity = '0.5';
+    }, 0);
+  };
+
+  const handleDragEnd = (e) => {
+    e.target.style.opacity = '1';
+    setDraggedQuestion(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    if (draggedQuestion && draggedQuestion.index !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = async (e, dropIndex) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!draggedQuestion || draggedQuestion.index === dropIndex) {
+      setDragOverIndex(null);
+      return;
+    }
+
+    const newQuestions = [...questions];
+    const draggedItem = newQuestions[draggedQuestion.index];
+    
+    // Remove from old position
+    newQuestions.splice(draggedQuestion.index, 1);
+    // Insert at new position
+    newQuestions.splice(dropIndex, 0, draggedItem);
+    
+    // Update local state immediately for smooth UX
+    setQuestions(newQuestions);
+    setDragOverIndex(null);
+
+    // Update order in backend
+    try {
+      const orderData = newQuestions.map((q, idx) => ({
+        id: q.id,
+        order: idx
+      }));
+
+      await api.post(`/exam/admin/exams/${selectedExam.id}/reorder-questions/`, {
+        questions: orderData
+      });
+
+      toast.success('Questions reordered successfully');
+    } catch (error) {
+      console.error('Error reordering questions:', error);
+      toast.error('Failed to save question order');
+      // Revert on error
+      fetchQuestions(selectedExam.id);
+    }
+  };
+
   const handleEditExam = (exam) => {
     setEditingExam({
       ...exam,
@@ -588,8 +661,20 @@ const saveQuestion = async () => {
                 ) : (
                   <div className="questions-grid">
                     {questions.map((question, index) => (
-                      <div key={question.id} className="question-card">
+                      <div 
+                        key={question.id} 
+                        className={`question-card ${dragOverIndex === index ? 'drag-over' : ''}`}
+                        draggable={true}
+                        onDragStart={(e) => handleDragStart(e, question, index)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, index)}
+                      >
                         <div className="question-card-header">
+                          <div className="drag-handle" title="Drag to reorder">
+                            <Icon name="GripVertical" size={18} style={{ color: 'var(--gray-400)' }} />
+                          </div>
                           <div className="question-number-badge">
                             Q{index + 1}
                           </div>

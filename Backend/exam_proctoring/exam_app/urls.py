@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/recent-attempts/', admin_views.recent_attempts, name='admin-recent-attempts'),
     path('admin/active-exams/', admin_views.active_exams, name='admin-active-exams'),
     path('admin/exams/<int:exam_id>/questions/', admin_views.exam_questions, name='admin-exam-questions'),
+    path('admin/exams/<int:exam_id>/reorder-questions/', admin_views.reorder_questions, name='admin-reorder-questions'),
     path('admin/questions/', admin_views.create_question, name='admin-create-question'),
     path('admin/questions/<int:question_id>/', admin_views.manage_question, name='admin-manage-question'),
     

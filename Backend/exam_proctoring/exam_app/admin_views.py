@@ -250,6 +250,35 @@ def exam_questions(request, exam_id):
         print(f"Error in exam_questions: {e}")
         print(traceback.format_exc())
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def reorder_questions(request, exam_id):
+    """Reorder questions for a specific exam"""
+    try:
+        if not is_admin_user(request.user):
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        exam = get_object_or_404(Exam, id=exam_id)
+        questions_order = request.data.get('questions', [])
+        
+        if not questions_order:
+            return Response({'error': 'Questions order data is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Update order for each question
+        for item in questions_order:
+            question_id = item.get('id')
+            new_order = item.get('order')
+            
+            if question_id is not None and new_order is not None:
+                Question.objects.filter(id=question_id, exam=exam).update(order=new_order)
+        
+        return Response({'message': 'Questions reordered successfully'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(f"Error in reorder_questions: {e}")
+        print(traceback.format_exc())
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 # backend/exam_app/admin_views.py (update create_question function)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

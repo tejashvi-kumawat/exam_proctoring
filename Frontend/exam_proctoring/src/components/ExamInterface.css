@@ -700,20 +700,41 @@
 @media (max-width: 1024px) {
   .exam-interface {
     flex-direction: column;
+    height: auto;
+    min-height: 100vh;
   }
 
-  .timer-section {
-    padding: 12px 16px;
-  }
-
-  .question-section {
-    padding: 16px;
-  }
-
-  .sidebar-section {
+  .proctoring-panel {
     width: 100%;
-    max-height: 300px;
-    overflow-y: auto;
+    max-height: none;
+    padding: 15px;
+    border-right: none;
+    border-bottom: 2px solid #e0e0e0;
+  }
+
+  .proctoring-video video {
+    height: 140px;
+  }
+
+  .exam-content {
+    flex: 1;
+  }
+
+  .exam-header {
+    padding: 15px 20px;
+  }
+
+  .exam-info h1 {
+    font-size: 20px;
+  }
+
+  .timer {
+    font-size: 20px;
+    padding: 8px 16px;
+  }
+
+  .question-content {
+    padding: 20px;
   }
 }
 
@@ -722,34 +743,79 @@
     min-height: 100vh;
   }
 
-  .timer-section {
-    padding: 10px 12px;
+  .proctoring-panel {
+    padding: 12px;
+    max-height: 180px;
   }
 
-  .timer-display {
+  .proctoring-header h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .proctoring-video video {
+    height: 100px;
+  }
+
+  .proctoring-video-element {
+    height: 100px;
+  }
+
+  .exam-header {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .exam-info h1 {
     font-size: 18px;
+  }
+
+  .exam-meta {
+    font-size: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .timer {
+    font-size: 18px;
+    padding: 6px 12px;
+    align-self: flex-start;
+  }
+
+  .question-navigation {
+    padding: 12px 16px;
+  }
+
+  .nav-grid {
+    grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+    gap: 6px;
+    max-width: 100%;
+  }
+
+  .nav-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .question-content {
+    padding: 16px;
   }
 
   .question-header {
     flex-direction: column;
+    align-items: flex-start;
     gap: 8px;
   }
 
-  .question-counter {
-    font-size: 14px;
-  }
-
-  .question-type-badge {
-    font-size: 11px;
-    padding: 4px 6px;
-  }
-
-  .question-title {
+  .question-info h2 {
     font-size: 16px;
   }
 
-  .question-image-container {
-    margin-top: 12px;
+  .question-text p {
+    font-size: 15px;
   }
 
   .question-image {
@@ -757,44 +823,40 @@
   }
 
   .option-image {
-    max-width: 150px;
-    max-height: 100px;
+    max-width: 120px;
+    max-height: 90px;
   }
 
-  .option-content {
-    font-size: 13px;
-    gap: 8px;
+  .option-label {
+    padding: 14px;
+    gap: 12px;
   }
 
   .option-text {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .question-actions {
+    padding: 16px;
     flex-direction: column;
     gap: 12px;
   }
 
   .nav-buttons {
     width: 100%;
+    flex-wrap: wrap;
     gap: 8px;
   }
 
-  .nav-btn {
-    font-size: 12px;
-    padding: 8px 12px;
+  .nav-buttons button {
     flex: 1;
+    min-width: 120px;
+    font-size: 13px;
   }
 
-  .nav-grid {
-    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-    gap: 6px;
-  }
-
-  .nav-btn-small {
-    width: 40px;
-    height: 40px;
-    font-size: 12px;
+  .submit-section {
+    width: 100%;
+    justify-content: stretch;
   }
 
   .submit-btn {
@@ -803,20 +865,8 @@
     padding: 12px;
   }
 
-  .sidebar-section {
-    width: 100%;
-    border-left: none;
-    border-top: 2px solid var(--gray-200);
-    margin-top: 16px;
-  }
-
-  .sidebar-header {
-    font-size: 14px;
-    padding: 12px 16px;
-  }
-
   .text-answer-input {
-    min-height: 80px;
+    min-height: 100px;
     font-size: 14px;
     padding: 10px;
   }
@@ -824,12 +874,39 @@
   .image-upload-label {
     width: 100%;
     justify-content: center;
-    font-size: 12px;
-    padding: 10px;
+    font-size: 13px;
+    padding: 10px 16px;
   }
 
-  .proctoring-video-element {
-    height: 150px;
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .violations-alert {
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  .violations-list {
+    max-height: 100px;
+  }
+
+  .violation-item {
+    padding: 6px;
+  }
+
+  .exam-progress {
+    padding: 12px;
+  }
+
+  .exam-progress h4 {
+    font-size: 14px;
+  }
+
+  .indicator {
+    padding: 5px 8px;
+    font-size: 10px;
   }
 }
 
@@ -838,126 +915,183 @@
     gap: 0;
   }
 
-  .timer-section {
-    padding: 6px 8px;
-  }
-
-  .timer-display {
-    font-size: 13px;
-  }
-
-  .timer-label {
-    font-size: 9px;
-  }
-
-  .question-section {
+  .proctoring-panel {
     padding: 8px;
+    max-height: 140px;
   }
 
-  .question-header {
-    gap: 4px;
+  .proctoring-header h3 {
+    font-size: 12px;
+    margin-bottom: 6px;
   }
 
-  .question-counter {
-    font-size: 11px;
+  .proctoring-video video {
+    height: 80px;
   }
 
-  .question-type-badge {
+  .proctoring-video-element {
+    height: 80px;
+  }
+
+  .proctoring-indicators {
+    gap: 3px;
+    margin-top: 4px;
+  }
+
+  .indicator {
+    padding: 3px 6px;
     font-size: 9px;
-    padding: 2px 4px;
   }
 
-  .question-title {
-    font-size: 13px;
+  .audio-indicator {
+    padding: 3px 6px;
+    font-size: 9px;
   }
 
-  .question-image-container {
-    margin-top: 6px;
+  .exam-header {
+    padding: 10px 12px;
   }
 
-  .question-image {
-    max-height: 150px;
+  .exam-info h1 {
+    font-size: 16px;
   }
 
-  .option-container {
-    padding: 6px;
-  }
-
-  .option-image {
-    max-width: 100px;
-    max-height: 80px;
-  }
-
-  .option-content {
+  .exam-meta {
     font-size: 11px;
-    gap: 4px;
-  }
-
-  .option-text {
-    font-size: 11px;
-  }
-
-  .option-label-checkbox {
-    width: 16px;
-    height: 16px;
-  }
-
-  .question-actions {
     gap: 6px;
   }
 
-  .nav-buttons {
-    gap: 4px;
+  .timer {
+    font-size: 16px;
+    padding: 5px 10px;
   }
 
-  .nav-btn {
-    font-size: 10px;
-    padding: 4px 8px;
-  }
-
-  .nav-btn-small {
-    width: 32px;
-    height: 32px;
-    font-size: 10px;
+  .question-navigation {
+    padding: 10px 12px;
   }
 
   .nav-grid {
     grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
-    gap: 3px;
+    gap: 4px;
+  }
+
+  .nav-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 11px;
+  }
+
+  .question-content {
+    padding: 12px;
+  }
+
+  .question-info h2 {
+    font-size: 14px;
+  }
+
+  .question-marks, .question-type {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  .question-text p {
+    font-size: 14px;
+  }
+
+  .question-image {
+    max-height: 180px;
+  }
+
+  .option-image {
+    max-width: 100px;
+    max-height: 75px;
+  }
+
+  .option-label {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .option-indicator {
+    width: 16px;
+    height: 16px;
+  }
+
+  .option-text {
+    font-size: 13px;
+  }
+
+  .question-actions {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .nav-buttons button {
+    min-width: 100px;
+    font-size: 12px;
+    padding: 8px 12px;
   }
 
   .submit-btn {
-    font-size: 11px;
-    padding: 8px;
-  }
-
-  .submit-section {
-    padding: 8px;
-  }
-
-  .sidebar-section {
-    margin-top: 8px;
-    padding: 0;
-  }
-
-  .sidebar-header {
-    font-size: 12px;
-    padding: 8px 10px;
+    font-size: 13px;
+    padding: 10px;
   }
 
   .text-answer-input {
-    min-height: 70px;
-    font-size: 12px;
-    padding: 6px;
+    min-height: 80px;
+    font-size: 13px;
+    padding: 8px;
   }
 
   .image-upload-label {
-    font-size: 10px;
-    padding: 6px;
+    font-size: 12px;
+    padding: 8px 12px;
   }
 
-  .fullscreen-warning-modal {
-    z-index: 10001;
+  .images-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .image-preview-item img {
+    height: 120px;
+  }
+
+  .violations-alert {
+    padding: 10px;
+    font-size: 11px;
+  }
+
+  .violations-alert h4 {
+    font-size: 12px;
+  }
+
+  .violations-list {
+    max-height: 80px;
+  }
+
+  .violation-item {
+    padding: 5px;
+  }
+
+  .violation-type {
+    font-size: 10px;
+  }
+
+  .violation-time {
+    font-size: 9px;
+  }
+
+  .exam-progress {
+    padding: 10px;
+  }
+
+  .exam-progress h4 {
+    font-size: 13px;
+  }
+
+  .stat .label, .stat .value {
+    font-size: 12px;
   }
 
   .warning-content {
@@ -977,10 +1111,6 @@
     line-height: 1.3;
   }
 
-  .proctoring-video-element {
-    height: 100px;
-  }
-
   .proctoring-error {
     font-size: 10px;
     padding: 4px;
@@ -988,251 +1118,63 @@
   }
 
   .proctoring-status {
-    padding: 10px;
-    font-size: 12px;
-  }
-
-  .proctoring-indicators {
-    gap: 3px;
-    margin-top: 6px;
-  }
-
-  .indicator {
-    padding: 2px 4px;
-    font-size: 9px;
-  }
-
-  .audio-indicator {
-    padding: 2px 4px;
-    font-size: 9px;
-  }
-
-  .image-upload-label {
-    padding: 8px 12px;
-  }
-
-  .text-answer-input {
-    min-height: 60px;
-    padding: 6px;
-    font-size: 12px;
-  }
-
-  .btn {
-    font-size: 10px;
-    padding: 6px 8px;
-    min-height: auto;
-  }
-}
-
-
-/* Comprehensive Mobile Responsiveness for ExamInterface */
-@media (max-width: 1024px) {
-  .exam-interface {
-    flex-direction: column;
-  }
-
-  .exam-sidebar {
-    width: 100%;
-    max-width: none;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-right: none;
-    border-bottom: 1px solid #e5e7eb;
-  }
-
-  .exam-main-content {
-    width: 100%;
-    flex: 1;
-  }
-}
-
-@media (max-width: 768px) {
-  .exam-header {
-    padding: 12px 16px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .exam-title h2 {
-    font-size: 18px;
-  }
-
-  .exam-info {
-    font-size: 12px;
-  }
-
-  .exam-timer {
-    font-size: 16px;
-    padding: 8px 12px;
-  }
-
-  .question-navigation {
-    padding: 12px 16px;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .question-counter {
-    font-size: 13px;
-  }
-
-  .nav-buttons {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .nav-buttons .btn {
-    font-size: 13px;
-    padding: 8px 14px;
-  }
-
-  .question-display {
-    padding: 16px;
-  }
-
-  .question-text {
-    font-size: 15px;
-  }
-
-  .question-image {
-    max-height: 250px;
-  }
-
-  .options-list {
-    gap: 10px;
-  }
-
-  .option-item {
-    padding: 12px;
-    font-size: 14px;
-  }
-
-  .text-answer-input {
-    min-height: 120px;
-    font-size: 14px;
-  }
-
-  .question-grid {
-    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
-    gap: 8px;
-    padding: 12px;
-  }
-
-  .question-number-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 13px;
-  }
-
-  .proctoring-status {
-    padding: 12px;
-  }
-
-  .status-indicator {
-    font-size: 13px;
-  }
-
-  .submit-section {
-    padding: 16px;
-  }
-
-  .submit-section .btn {
-    width: 100%;
-    font-size: 14px;
-  }
-
-  .violations-alert {
-    padding: 12px;
-    font-size: 13px;
-  }
-
-  .proctoring-video {
-    width: 140px;
-    height: 105px;
-  }
-}
-
-@media (max-width: 480px) {
-  .exam-header {
-    padding: 10px 12px;
-  }
-
-  .exam-title h2 {
-    font-size: 16px;
-  }
-
-  .exam-info {
+    padding: 8px;
     font-size: 11px;
   }
+}
 
-  .exam-timer {
-    font-size: 14px;
-    padding: 6px 10px;
+
+/* Collapsible Camera Panel for Mobile */
+@media (max-width: 768px) {
+  .proctoring-panel {
+    transition: max-height 0.3s ease;
   }
 
-  .question-navigation {
-    padding: 10px 12px;
+  .proctoring-panel.collapsed {
+    max-height: 50px;
+    overflow: hidden;
   }
 
-  .question-counter {
+  .proctoring-header {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .proctoring-header::after {
+    content: '▼';
+    position: absolute;
+    right: 0;
+    top: 0;
     font-size: 12px;
+    color: var(--gray-600);
+    transition: transform 0.3s ease;
   }
 
-  .nav-buttons .btn {
-    font-size: 12px;
-    padding: 6px 12px;
+  .proctoring-panel.collapsed .proctoring-header::after {
+    transform: rotate(-90deg);
+  }
+}
+
+/* Loading and Error States Mobile */
+@media (max-width: 768px) {
+  .exam-loading, .exam-error {
+    padding: 40px 20px;
   }
 
-  .question-display {
-    padding: 12px;
-  }
-
-  .question-text {
-    font-size: 14px;
-  }
-
-  .question-image {
-    max-height: 200px;
-  }
-
-  .option-item {
-    padding: 10px;
-    font-size: 13px;
-  }
-
-  .text-answer-input {
-    min-height: 100px;
-    font-size: 13px;
-  }
-
-  .question-grid {
-    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-    gap: 6px;
-    padding: 10px;
-  }
-
-  .question-number-btn {
+  .exam-loading .loading-spinner {
     width: 40px;
     height: 40px;
-    font-size: 12px;
+  }
+}
+
+/* Better touch targets for mobile */
+@media (max-width: 768px) {
+  .nav-btn, .option-label, button {
+    min-height: 44px; /* iOS recommended touch target */
   }
 
-  .proctoring-status {
-    padding: 10px;
-  }
-
-  .status-indicator {
-    font-size: 12px;
-  }
-
-  .submit-section {
-    padding: 12px;
-  }
-
-  .proctoring-video {
-    width: 120px;
-    height: 90px;
+  .option-label {
+    padding: 16px;
   }
 }

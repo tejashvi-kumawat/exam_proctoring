@@ -255,6 +255,7 @@ def submit_answer(request, attempt_id):
                 time_taken = None
         
         images = []
+        attachments = []  # FIX: Initialize attachments for JSON requests
     
     question = get_object_or_404(Question, id=question_id, exam=attempt.exam)
     
@@ -338,8 +339,7 @@ def submit_answer(request, attempt_id):
                     'is_correct': existing_answer.is_correct,
                     'marks_awarded': existing_answer.marks_awarded,
                     'has_images': len(images) > 0,
-                    'has_attachments': len(attachments) > 0,
-                    'has_images': len(images) > 0
+                    'has_attachments': len(attachments) > 0
                 },
                 ip_address=get_client_ip(request)
             )

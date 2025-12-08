@@ -19,7 +19,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Token ${token}`;
     }
-    // console.log('Making request to:', config.baseURL + config.url); // Debug log
+    console.log('Making request to:', config.baseURL + config.url); // Debug log
     return config;
   },
   (error) => {

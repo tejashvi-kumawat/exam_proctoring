@@ -255,6 +255,7 @@ def submit_answer(request, attempt_id):
                 time_taken = None
         
         images = []
+        attachments = []
     
     question = get_object_or_404(Question, id=question_id, exam=attempt.exam)
     

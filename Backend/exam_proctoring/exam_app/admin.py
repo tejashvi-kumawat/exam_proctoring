@@ -2,12 +2,18 @@
 from django.contrib import admin
 from django.utils import timezone
 from django.contrib import messages
-from .models import Subject, Exam, Question, Option, ExamAttempt, Answer, ExamActivityLog
+from .models import Subject, Exam, Question, Option, ExamAttempt, Answer, AnswerImage, ExamActivityLog
 
 class OptionInline(admin.TabularInline):
     model = Option
     extra = 4
     fields = ('option_text', 'is_correct', 'order')
+
+class AnswerImageInline(admin.TabularInline):
+    model = AnswerImage
+    extra = 0
+    fields = ('image', 'order', 'uploaded_at')
+    readonly_fields = ('uploaded_at',)
 
 class QuestionInline(admin.StackedInline):
     model = Question
@@ -151,13 +157,14 @@ class AnswerAdmin(admin.ModelAdmin):
     ordering = ('-answered_at',)
     readonly_fields = ('answered_at',)
     list_editable = ('marks_awarded', 'is_correct')  # Allow quick editing of marks
+    inlines = [AnswerImageInline]
     
     fieldsets = (
         ('Answer Information', {
             'fields': ('attempt', 'question', 'answered_at')
         }),
         ('Answer Content', {
-            'fields': ('selected_option', 'answer_text', 'answer_images')
+            'fields': ('selected_option', 'answer_text')
         }),
         ('Grading', {
             'fields': ('marks_awarded', 'is_correct')

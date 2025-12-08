@@ -384,6 +384,11 @@ def manage_question(request, question_id):
         print(f"Managing question: {question.id}")
         
         if request.method == 'PUT':
+            # Handle question image update if provided
+            if 'question_image' in request.FILES:
+                question.question_image = request.FILES['question_image']
+                question.save()
+            
             # Update question
             question_data = {
                 'question_text': request.data.get('question_text', question.question_text),
@@ -398,13 +403,49 @@ def manage_question(request, question_id):
                 
                 # Update options
                 question.options.all().delete()  # Remove existing options
+                
+                # Parse options from both JSON and FormData formats
                 options_data = request.data.get('options', [])
+                
+                # If options is empty, try parsing FormData format: options[0][option_text], etc.
+                if not options_data:
+                    parsed_options = {}
+                    for key in request.data.keys():
+                        if key.startswith('options['):
+                            # Extract index and field name from 'options[0][option_text]'
+                            import re
+                            match = re.match(r'options\[(\d+)\]\[(\w+)\]', key)
+                            if match:
+                                index = int(match.group(1))
+                                field = match.group(2)
+                                if index not in parsed_options:
+                                    parsed_options[index] = {}
+                                parsed_options[index][field] = request.data.get(key)
+                    
+                    # Convert dict to list
+                    if parsed_options:
+                        options_data = [parsed_options[i] for i in sorted(parsed_options.keys())]
+                
+                # Get option images if any
+                option_images = request.FILES.getlist('option_images') if 'option_images' in request.FILES else []
+                
                 for i, option_data in enumerate(options_data):
-                    if option_data.get('option_text'):  # Only create non-empty options
+                    option_text = option_data.get('option_text', '')
+                    # Parse is_correct - handle both boolean and string formats
+                    is_correct = option_data.get('is_correct', False)
+                    if isinstance(is_correct, str):
+                        is_correct = is_correct.lower() in ['true', '1', 'yes']
+                    
+                    # Get option image if available
+                    option_image = option_images[i] if i < len(option_images) else None
+                    
+                    # Only create options with text or image
+                    if option_text or option_image:
                         Option.objects.create(
                             question=question,
-                            option_text=option_data.get('option_text', ''),
-                            is_correct=option_data.get('is_correct', False),
+                            option_text=option_text,
+                            option_image=option_image,
+                            is_correct=bool(is_correct),
                             order=i
                         )
                 

@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  background: #f9fafb;
   padding: var(--spacing-md);
   width: 100vw;
 }
@@ -28,7 +28,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  background: var(--primary-color);
 }
 
 .login-header {
@@ -88,7 +88,7 @@
 .form-group input:focus {
   border-color: var(--primary-color);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   background: white;
 }
 
@@ -97,7 +97,7 @@
 }
 
 .login-btn {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background: var(--primary-color);
   color: white;
   padding: 1rem 1.5rem;
   border: none;
@@ -113,7 +113,7 @@
 }
 
 .login-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--primary-dark), var(--secondary-color));
+  background: var(--primary-dark);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
@@ -205,7 +205,7 @@
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
   .login-card {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    background: var(--gray-800);
     color: white;
   }
   

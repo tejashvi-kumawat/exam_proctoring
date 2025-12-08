@@ -41,16 +41,73 @@ export const useExam = () => {
     }
   };
 
-  const submitAnswer = async (attemptId, questionId, selectedOptionId, answerText = '') => {
+  const submitAnswer = async (attemptId, questionId, selectedOptionId = null, answerText = '', images = [], attachments = []) => {
     try {
-      const response = await api.post(`/exam/attempts/${attemptId}/submit-answer/`, {
-        question_id: questionId,
-        selected_option_id: selectedOptionId,
-        answer_text: answerText
-      });
-      return response.data;
+      // Use FormData for multipart/form-data if images or attachments are present
+      if ((images && images.length > 0) || (attachments && attachments.length > 0)) {
+        const formData = new FormData();
+        formData.append('question_id', questionId);
+        // Only append selected_option_id if it's not null/undefined
+        if (selectedOptionId !== null && selectedOptionId !== undefined) {
+          formData.append('selected_option_id', selectedOptionId);
+        }
+        if (answerText) formData.append('answer_text', answerText);
+        
+        // Append images
+        if (images && images.length > 0) {
+          images.forEach((image) => {
+            formData.append('images', image);
+          });
+        }
+        
+        // Append attachments
+        if (attachments && attachments.length > 0) {
+          attachments.forEach((attachment) => {
+            formData.append('attachments', attachment);
+          });
+        }
+        
+        const response = await api.post(`/exam/attempts/${attemptId}/submit-answer/`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        return response.data;
+      } else {
+        // Regular JSON request - only include selected_option_id if it's not null
+        const payload = {
+          question_id: questionId,
+          answer_text: answerText || ''
+        };
+        // Only add selected_option_id if it's not null/undefined
+        if (selectedOptionId !== null && selectedOptionId !== undefined) {
+          payload.selected_option_id = selectedOptionId;
+        }
+        const response = await api.post(`/exam/attempts/${attemptId}/submit-answer/`, payload);
+        return response.data;
+      }
     } catch (err) {
       console.error('Error submitting answer:', err);
+      throw err;
+    }
+  };
+
+  const pauseExam = async (attemptId) => {
+    try {
+      const response = await api.post(`/exam/attempts/${attemptId}/pause/`);
+      return response.data;
+    } catch (err) {
+      console.error('Error pausing exam:', err);
+      throw err;
+    }
+  };
+
+  const resumeExam = async (attemptId) => {
+    try {
+      const response = await api.post(`/exam/attempts/${attemptId}/resume/`);
+      return response.data;
+    } catch (err) {
+      console.error('Error resuming exam:', err);
       throw err;
     }
   };
@@ -68,14 +125,20 @@ export const useExam = () => {
 const getExamResults = async (attemptId) => {
   try {
     const response = await api.get(`/exam/attempts/${attemptId}/results/`);
-    console.log('API response:', response.data); // Debug log
     return response.data;
   } catch (err) {
-    console.error('Error fetching results:', err);
     throw err;
   }
 };
-
+  const restartExam = async (attemptId) => {
+    try {
+      const response = await api.post(`/exam/admin/attempts/${attemptId}/restart/`);
+      return response.data;
+    } catch (err) {
+      console.error('Error restarting exam:', err);
+      throw err;
+    }
+  };
 
   useEffect(() => {
     fetchExams();
@@ -90,6 +153,9 @@ const getExamResults = async (attemptId) => {
     startExam,
     submitAnswer,
     submitExam,
-    getExamResults
+    getExamResults,
+    pauseExam,
+    resumeExam,
+    restartExam
   };
 };

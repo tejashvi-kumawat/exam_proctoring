@@ -1,0 +1,173 @@
+# ========================================
+# EXAM PROCTORING SYSTEM - .gitignore
+# ========================================
+
+# ========================================
+# BACKEND (Django/Python)
+# ========================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Virtual Environment
+Backend/exam_proctoring_env/
+venv/
+env/
+ENV/
+.venv
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/Backend/exam_proctoring/db.sqlite3
+
+# Media & Static Files (uploaded by users)
+/Backend/exam_proctoring/media/
+/Backend/exam_proctoring/staticfiles/
+/Backend/exam_proctoring/static/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# ========================================
+# FRONTEND (React/Node.js)
+# ========================================
+
+# Dependencies
+/Frontend/exam_proctoring/node_modules/
+/Frontend/node_modules/
+node_modules/
+
+# Build Output
+/Frontend/exam_proctoring/dist/
+/Frontend/exam_proctoring/build/
+dist/
+build/
+
+# Testing
+coverage/
+*.coverage
+.nyc_output
+
+# Environment Files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ========================================
+# GENERAL
+# ========================================
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary Files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~.nib
+
+# Certificates & Keys
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+
+# Secrets
+secrets/
+*.secret
+
+# ========================================
+# PROJECT SPECIFIC
+# ========================================
+
+# Sample data (optional - uncomment if you don't want to track)
+# sample_questions.csv
+# sample_questions.json
+
+# Deployment
+.vercel
+.netlify
+
+# Cache
+.cache/
+*.cache
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Redis dump
+dump.rdb
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Documentation builds
+docs/_build/
+

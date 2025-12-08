@@ -2,18 +2,29 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useToast } from '../hooks/useToast';
 import './InstructorApproval.css';
 
 const InstructorApproval = () => {
   const navigate = useNavigate();
+  const { showSuccess, showError } = useToast();
   const [pendingRequests, setPendingRequests] = useState([]);
   const [history, setHistory] = useState({ approved: [], rejected: [] });
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('pending');
+  // Load activeTab from localStorage, default to 'pending'
+  const [activeTab, setActiveTab] = useState(() => {
+    const savedTab = localStorage.getItem('instructorApproval_activeTab');
+    return savedTab || 'pending';
+  });
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Save activeTab to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('instructorApproval_activeTab', activeTab);
+  }, [activeTab]);
 
   const fetchData = async () => {
     try {
@@ -34,11 +45,11 @@ const InstructorApproval = () => {
   const approveInstructor = async (userId) => {
     try {
       await api.post(`/auth/admin/approve-instructor/${userId}/`);
-      alert('Instructor approved successfully!');
+      showSuccess('Instructor approved successfully!');
       fetchData();
     } catch (error) {
       console.error('Error approving instructor:', error);
-      alert('Failed to approve instructor');
+      showError('Failed to approve instructor');
     }
   };
 

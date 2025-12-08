@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import Icon from './Icon';
+import Logo from './Logo';
 import './AdminPanel.css';
 
 const AdminPanel = () => {
@@ -47,56 +49,83 @@ const AdminPanel = () => {
 
   return (
     <div className="admin-panel">
-      <header className="admin-header">
-        <div className="header-content">
-          <h1>Admin Panel</h1>
-          <div className="header-actions">
-            <button 
-              onClick={() => navigate('/admin/questions')}
-              className="btn btn-primary"
-            >
-              Manage Questions
-            </button>
-            <button 
-              onClick={() => navigate('/admin/instructor-approval')}
-              className="btn btn-primary"
-            >
-              Instructor Approval
-            </button>
-            
-            <button 
-              onClick={() => navigate('/admin/monitor')}
-              className="btn btn-secondary"
-            >
-              Monitor Exams
-            </button>
-            <button onClick={logout} className="btn btn-outline">
-              Logout
-            </button>
-          </div>
+      <header className="header-professional">
+        <div className="header-left">
+          <Logo size="small" onClick={() => navigate('/dashboard')} />
+          <span className="badge badge-primary">
+            <Icon name="Shield" size={12} />
+            Admin
+          </span>
+        </div>
+        <div className="header-right">
+          <button 
+            onClick={() => navigate('/admin/questions')}
+            className="btn btn-icon"
+            data-tooltip="Questions"
+          >
+            <Icon name="FileText" size={18} />
+          </button>
+          <button 
+            onClick={() => navigate('/admin/instructor-approval')}
+            className="btn btn-icon"
+            data-tooltip="Approvals"
+          >
+            <Icon name="UserCheck" size={18} />
+          </button>
+          <button 
+            onClick={() => navigate('/admin/monitor')}
+            className="btn btn-sm btn-primary"
+          >
+            <Icon name="Eye" size={16} />
+            Monitor
+          </button>
+          <button 
+            onClick={logout} 
+            className="btn btn-sm btn-secondary"
+          >
+            <Icon name="LogOut" size={16} />
+            Logout
+          </button>
         </div>
       </header>
 
-      <div className="admin-content">
-        {/* Statistics Overview */}
-        <div className="stats-overview">
-          <h2>System Overview</h2>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <h3>Total Exams</h3>
-              <p className="stat-number">{stats.total_exams || 0}</p>
+      <div className="page-content">
+        {/* Stats Overview */}
+        <div className="stats-row">
+          <div className="stat-card-pro">
+            <div className="stat-icon-pro">
+              <Icon name="BookOpen" size={22} style={{ color: 'var(--primary)' }} />
             </div>
-            <div className="stat-card">
-              <h3>Active Students</h3>
-              <p className="stat-number">{stats.active_students || 0}</p>
+            <div className="stat-content-pro">
+              <span className="stat-value-pro">{stats.total_exams || 0}</span>
+              <span className="stat-label-pro">Total Exams</span>
             </div>
-            <div className="stat-card">
-              <h3>Total Attempts</h3>
-              <p className="stat-number">{stats.total_attempts || 0}</p>
+          </div>
+          <div className="stat-card-pro">
+            <div className="stat-icon-pro">
+              <Icon name="Users" size={22} style={{ color: 'var(--success)' }} />
             </div>
-            <div className="stat-card">
-              <h3>Violations Today</h3>
-              <p className="stat-number">{stats.violations_today || 0}</p>
+            <div className="stat-content-pro">
+              <span className="stat-value-pro">{stats.active_students || 0}</span>
+              <span className="stat-label-pro">Active Students</span>
+            </div>
+          </div>
+          <div className="stat-card-pro">
+            <div className="stat-icon-pro">
+              <Icon name="FileText" size={22} style={{ color: 'var(--warning)' }} />
+            </div>
+            <div className="stat-content-pro">
+              <span className="stat-value-pro">{stats.total_attempts || 0}</span>
+              <span className="stat-label-pro">Total Attempts</span>
+            </div>
+          </div>
+          <div className="stat-card-pro">
+            <div className="stat-icon-pro">
+              <Icon name="AlertTriangle" size={22} style={{ color: 'var(--danger)' }} />
+            </div>
+            <div className="stat-content-pro">
+              <span className="stat-value-pro">{stats.violations_today || 0}</span>
+              <span className="stat-label-pro">Violations Today</span>
             </div>
           </div>
         </div>
@@ -159,7 +188,9 @@ const AdminPanel = () => {
               onClick={() => navigate('/admin/create-exam')}
               className="action-card"
             >
-              <span className="action-icon">📝</span>
+              <span className="action-icon">
+                <Icon name="FileEdit" size={32} />
+              </span>
               <h3>Create New Exam</h3>
               <p>Set up a new examination</p>
             </button>
@@ -168,7 +199,9 @@ const AdminPanel = () => {
               onClick={() => navigate('/admin/questions')}
               className="action-card"
             >
-              <span className="action-icon">❓</span>
+              <span className="action-icon">
+                <Icon name="HelpCircle" size={32} />
+              </span>
               <h3>Manage Questions</h3>
               <p>Add, edit, or delete questions</p>
             </button>
@@ -177,7 +210,9 @@ const AdminPanel = () => {
               onClick={() => navigate('/admin/users')}
               className="action-card"
             >
-              <span className="action-icon">👥</span>
+              <span className="action-icon">
+                <Icon name="Users" size={32} />
+              </span>
               <h3>Manage Users</h3>
               <p>View and manage student accounts</p>
             </button>
@@ -186,9 +221,59 @@ const AdminPanel = () => {
               onClick={() => navigate('/admin/reports')}
               className="action-card"
             >
-              <span className="action-icon">📊</span>
+              <span className="action-icon">
+                <Icon name="BarChart3" size={32} />
+              </span>
               <h3>View Reports</h3>
               <p>Generate exam and violation reports</p>
+            </button>
+          </div>
+        </div>
+
+        {/* Data Management */}
+        <div className="data-management" style={{ marginTop: '40px', padding: '20px', background: 'white', borderRadius: '12px', boxShadow: 'var(--shadow)' }}>
+          <h2>Data Management</h2>
+          <div className="danger-zone" style={{ padding: '20px', background: '#fff5f5', border: '2px solid var(--danger-color)', borderRadius: '8px', marginTop: '15px' }}>
+            <h3 style={{ color: 'var(--danger-color)', display: 'flex', alignItems: 'center', marginTop: 0 }}>
+              <Icon name="AlertTriangle" size={20} style={{ marginRight: '8px' }} />
+              Danger Zone
+            </h3>
+            <p style={{ color: 'var(--gray-700)', lineHeight: '1.6' }}>
+              Delete all exam data to free up space (512MB limit). This will delete all exams, questions, answers, attempts, and uploaded images. <strong>Subjects will be preserved.</strong>
+            </p>
+            <button
+              onClick={async () => {
+                const confirm = window.confirm(
+                  '⚠️ WARNING: This will delete ALL exam data including:\n\n' +
+                  '- All exams\n' +
+                  '- All questions and options\n' +
+                  '- All answers and uploaded images\n' +
+                  '- All exam attempts\n' +
+                  '- All activity logs\n\n' +
+                  'This action CANNOT be undone!\n\n' +
+                  'Are you absolutely sure?'
+                );
+                if (confirm) {
+                  const finalConfirm = window.confirm('FINAL CONFIRMATION: Are you 100% sure you want to delete ALL exam data?');
+                  if (finalConfirm) {
+                    try {
+                      const response = await api.delete('/exam/admin/delete-all-data/', {
+                        data: { confirm: true }
+                      });
+                      alert(`Success! Deleted:\n${JSON.stringify(response.data.deleted_counts, null, 2)}\n\nSubjects preserved: ${response.data.subjects_preserved}`);
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('Error deleting data:', error);
+                      alert('Error deleting data: ' + (error.response?.data?.error || error.message));
+                    }
+                  }
+                }
+              }}
+              className="btn btn-danger"
+              style={{ marginTop: '15px' }}
+            >
+              <Icon name="Trash2" size={18} style={{ marginRight: '8px' }} />
+              Delete All Exam Data
             </button>
           </div>
         </div>

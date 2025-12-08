@@ -15,7 +15,24 @@ const Login = () => {
   const { login, user } = useAuth();
   const navigate = useNavigate();
 
+  // All hooks must be called first, before any conditional returns
+  React.useEffect(() => {
+    if (user) {
+      // If admin or instructor, redirect to admin panel
+      if (user.is_staff || user.is_instructor) {
+        navigate('/admin');
+      } else {
+        // Regular user goes to dashboard
+        navigate('/dashboard');
+      }
+    }
+  }, [user, navigate]);
+
+  // Redirect based on user role if already logged in
   if (user) {
+    if (user.is_staff || user.is_instructor) {
+      return <Navigate to="/admin" />;
+    }
     return <Navigate to="/dashboard" />;
   }
 
@@ -34,7 +51,10 @@ const Login = () => {
     const result = await login(credentials.username, credentials.password);
     
     if (result.success) {
-      navigate('/dashboard');
+      // Check if user is admin/instructor and redirect accordingly
+      // We need to get the user from auth context after login
+      // Since login updates the user in context, we'll check it in useEffect
+      // For now, redirect to dashboard - the redirect will happen in useEffect
     } else {
       setError(result.error);
     }

@@ -13,12 +13,14 @@ import AdminPanel from './components/AdminPanel';
 import QuestionManager from './components/QuestionManager';
 import ExamMonitor from './components/ExamMonitor';
 import CreateExam from './components/CreateExam';
+import ExamWizard from './components/ExamWizard';
 import UserManagement from './components/UserManagement';
 import Reports from './components/Reports';
 import AttemptDetails from './components/AttemptDetails';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import InstructorApproval from './components/InstructorApproval';
+import Toast from './components/Toast';
 import './App.css';
 
 function App() {
@@ -27,6 +29,7 @@ function App() {
       <ExamProvider>
         <Router>
           <div className="App">
+            <Toast />
             <Routes>
               {/* Public Routes */}
               <Route path="/login" element={<Login />} />
@@ -76,6 +79,11 @@ function App() {
                 </AdminRoute>
               } />
               <Route path="/admin/create-exam" element={
+                <AdminRoute>
+                  <ExamWizard />
+                </AdminRoute>
+              } />
+              <Route path="/admin/create-exam-old" element={
                 <AdminRoute>
                   <CreateExam />
                 </AdminRoute>

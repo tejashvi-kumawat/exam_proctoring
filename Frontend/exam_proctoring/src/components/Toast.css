@@ -1,0 +1,5 @@
+/* Toast notification styles */
+.toast-container {
+  z-index: 9999;
+}
+

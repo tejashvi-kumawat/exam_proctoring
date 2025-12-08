@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useExam } from '../hooks/useExam';
 import faceDetectionService from '../services/faceDetection';
+import Icon from './Icon';
 import './ProctoringSetup.css';
 
 const ProctoringSetup = () => {
@@ -101,8 +102,6 @@ const ProctoringSetup = () => {
     setFaceDetectionStatus('Starting face detection...');
     
     faceDetectionService.startDetection(videoRef.current, (result) => {
-      console.log('Face detection result:', result);
-      
       if (result.error) {
         setFaceDetectionStatus(`Error: ${result.error}`);
         setFaceDetected(false);
@@ -111,9 +110,9 @@ const ProctoringSetup = () => {
         setFaceDetected(detected);
         
         if (detected) {
-          setFaceDetectionStatus(`✅ Face detected (confidence: ${(result.confidence * 100).toFixed(0)}%)`);
+          setFaceDetectionStatus(`Face detected (confidence: ${(result.confidence * 100).toFixed(0)}%)`);
         } else {
-          setFaceDetectionStatus('❌ No face detected - Please position your face in the camera');
+          setFaceDetectionStatus('No face detected - Please position your face in the camera');
         }
       }
     });
@@ -209,9 +208,22 @@ const ProctoringSetup = () => {
           {/* Camera Test */}
           <div className={`setup-step ${cameraTest ? 'completed' : ''}`}>
             <div className="step-header">
-              <h3>📹 Camera Test</h3>
+              <h3>
+                <Icon name="Video" size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                Camera Test
+              </h3>
               <div className="step-status">
-                {cameraTest ? '✅ Ready' : '❌ Not Ready'}
+                {cameraTest ? (
+                  <>
+                    <Icon name="CheckCircle" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                    Ready
+                  </>
+                ) : (
+                  <>
+                    <Icon name="XCircle" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                    Not Ready
+                  </>
+                )}
               </div>
             </div>
             
@@ -248,9 +260,22 @@ const ProctoringSetup = () => {
           {/* Microphone Test */}
           <div className={`setup-step ${microphoneTest ? 'completed' : ''}`}>
             <div className="step-header">
-              <h3>🎤 Microphone Test</h3>
+              <h3>
+                <Icon name="Mic" size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                Microphone Test
+              </h3>
               <div className="step-status">
-                {microphoneTest ? '✅ Ready' : '❌ Not Ready'}
+                {microphoneTest ? (
+                  <>
+                    <Icon name="CheckCircle" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                    Ready
+                  </>
+                ) : (
+                  <>
+                    <Icon name="XCircle" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                    Not Ready
+                  </>
+                )}
               </div>
             </div>
             
@@ -278,31 +303,46 @@ const ProctoringSetup = () => {
 
           {/* Instructions */}
           <div className="setup-step instructions-step">
-            <h3>📋 Proctoring Instructions</h3>
+            <h3>
+              <Icon name="FileText" size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+              Proctoring Instructions
+            </h3>
             <div className="instructions-content">
               <div className="instructions-grid">
                 <div className="instruction-item">
-                  <span className="instruction-icon">👤</span>
+                  <span className="instruction-icon">
+                    <Icon name="User" size={24} />
+                  </span>
                   <p>Keep your face visible to the camera at all times</p>
                 </div>
                 <div className="instruction-item">
-                  <span className="instruction-icon">🚫</span>
+                  <span className="instruction-icon">
+                    <Icon name="Ban" size={24} />
+                  </span>
                   <p>Do not switch tabs or minimize the browser window</p>
                 </div>
                 <div className="instruction-item">
-                  <span className="instruction-icon">📱</span>
+                  <span className="instruction-icon">
+                    <Icon name="Smartphone" size={24} />
+                  </span>
                   <p>Do not use any external devices or materials</p>
                 </div>
                 <div className="instruction-item">
-                  <span className="instruction-icon">🔇</span>
+                  <span className="instruction-icon">
+                    <Icon name="VolumeX" size={24} />
+                  </span>
                   <p>Maintain a quiet environment</p>
                 </div>
                 <div className="instruction-item">
-                  <span className="instruction-icon">⌨️</span>
+                  <span className="instruction-icon">
+                    <Icon name="Keyboard" size={24} />
+                  </span>
                   <p>Do not copy, paste, or right-click during the exam</p>
                 </div>
                 <div className="instruction-item">
-                  <span className="instruction-icon">⚠️</span>
+                  <span className="instruction-icon">
+                    <Icon name="AlertTriangle" size={24} />
+                  </span>
                   <p>Any violations will be logged and may result in exam termination</p>
                 </div>
               </div>

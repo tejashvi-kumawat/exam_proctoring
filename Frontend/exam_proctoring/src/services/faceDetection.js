@@ -12,9 +12,8 @@ class FaceDetectionService {
     if ('FaceDetector' in window) {
       try {
         this.faceDetector = new FaceDetector();
-        console.log('Native Face Detection API available');
       } catch (error) {
-        console.log('Face Detection API not supported, using fallback');
+        // Face Detection API not supported, using fallback
       }
     }
   }
@@ -23,7 +22,6 @@ class FaceDetectionService {
     if (this.isDetecting) return;
 
     this.isDetecting = true;
-    console.log('Starting face detection...');
     
     this.detectionInterval = setInterval(() => {
       this.detectFaces(videoElement, onDetection);
@@ -32,7 +30,6 @@ class FaceDetectionService {
 
   async detectFaces(videoElement, onDetection) {
     if (!videoElement || videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
-      console.log('Video element not ready');
       if (onDetection) {
         onDetection({
           faces: 0,
@@ -65,9 +62,8 @@ class FaceDetectionService {
           const faces = await this.faceDetector.detect(canvas);
           faceCount = faces.length;
           confidence = faceCount > 0 ? 0.9 : 0;
-          console.log(`Native detection: ${faceCount} faces found`);
         } catch (error) {
-          console.log('Native detection failed, using fallback');
+          // Native detection failed, using fallback
           const result = this.fallbackFaceDetection(ctx, canvas);
           faceCount = result.faces;
           confidence = result.confidence;
@@ -88,7 +84,6 @@ class FaceDetectionService {
       }
 
     } catch (error) {
-      console.error('Face detection error:', error);
       if (onDetection) {
         onDetection({
           faces: 0,
@@ -136,8 +131,6 @@ class FaceDetectionService {
       const hasSkinTone = skinRatio > 0.05; // At least 5% skin-tone pixels
       const hasMovement = this.detectMovement(data);
       
-      console.log(`Fallback detection - Skin: ${skinRatio.toFixed(3)}, Bright: ${brightRatio.toFixed(3)}, Movement: ${hasMovement}`);
-      
       if (hasValidVideo && (hasSkinTone || hasMovement)) {
         return { faces: 1, confidence: 0.7 };
       } else if (hasValidVideo) {
@@ -147,7 +140,6 @@ class FaceDetectionService {
       }
       
     } catch (error) {
-      console.error('Fallback detection error:', error);
       return { faces: 0, confidence: 0 };
     }
   }
@@ -195,7 +187,6 @@ class FaceDetectionService {
       this.detectionInterval = null;
     }
     this.previousFrameData = null;
-    console.log('Face detection stopped');
   }
 }
 

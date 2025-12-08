@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import Icon from './Icon';
 import './Reports.css';
 
 const Reports = () => {
@@ -202,13 +203,15 @@ const Reports = () => {
                     onClick={() => exportReport('pdf')}
                     className="btn btn-secondary"
                   >
-                    📄 Export PDF
+                    <Icon name="FileText" size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                    Export PDF
                   </button>
                   <button
                     onClick={() => exportReport('excel')}
                     className="btn btn-secondary"
                   >
-                    📊 Export Excel
+                    <Icon name="FileSpreadsheet" size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                    Export Excel
                   </button>
                 </div>
               )}

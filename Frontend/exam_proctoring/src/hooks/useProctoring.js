@@ -3,8 +3,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import websocketService from '../services/websocket';
 import faceDetectionService from '../services/faceDetection';
 import audioMonitoringService from '../services/audioMonitoring';
+import api from '../services/api';
 
-export const useProctoring = (attemptId) => {
+export const useProctoring = (attemptId, onTabSwitchLimitReached = null) => {
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
   const [violations, setViolations] = useState([]);
   const [cameraStream, setCameraStream] = useState(null);
@@ -19,7 +21,7 @@ export const useProctoring = (attemptId) => {
   const streamRef = useRef(null);
   const audioContextRef = useRef(null);
 
-  const logViolation = useCallback((violationType, description) => {
+  const logViolation = useCallback(async (violationType, description) => {
     const violation = {
       type: violationType,
       description: description,
@@ -29,19 +31,26 @@ export const useProctoring = (attemptId) => {
     
     setViolations(prev => [...prev, violation]);
     
-    if (isConnected) {
-      websocketService.send({
-        type: 'violation',
-        violation_type: violationType,
-        description: description,
-        timestamp: violation.timestamp
-      });
+    // Send violation directly to backend via HTTP POST instead of WebSocket
+    if (attemptId) {
+      try {
+        await api.post('/proctoring/violations/report/', {
+          attempt_id: attemptId,
+          violation_type: violationType,
+          description: description,
+          timestamp: violation.timestamp,
+          severity: 'MEDIUM'
+        });
+      } catch (error) {
+        // Silently handle errors - violations are logged locally anyway
+        console.error('Failed to report violation to backend:', error);
+      }
     }
-  }, [isConnected]);
+  }, [attemptId]);
 
   const initializeMedia = async () => {
     try {
-      console.log('Initializing media devices...');
+      // Initializing media devices
       setError('');
       
       const constraints = {
@@ -57,7 +66,7 @@ export const useProctoring = (attemptId) => {
       streamRef.current = stream;
       setCameraStream(stream);
       
-      console.log('Media stream obtained:', stream);
+      // Media stream obtained
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -65,12 +74,12 @@ export const useProctoring = (attemptId) => {
         
         // Wait for video to load before starting face detection
         videoRef.current.onloadedmetadata = () => {
-          console.log('Video metadata loaded, starting face detection...');
+          // Video metadata loaded, starting face detection
           startFaceDetection();
         };
         
         videoRef.current.onerror = (error) => {
-          console.error('Video error:', error);
+          // Video error occurred
           setError('Failed to load video stream');
           setCameraEnabled(false);
         };
@@ -82,7 +91,7 @@ export const useProctoring = (attemptId) => {
 
       return true;
     } catch (error) {
-      console.error('Error accessing media devices:', error);
+      // Error accessing media devices
       setError(`Media access error: ${error.message}`);
       setCameraEnabled(false);
       setMicrophoneEnabled(false);
@@ -92,29 +101,29 @@ export const useProctoring = (attemptId) => {
 
   const startFaceDetection = () => {
     if (!videoRef.current) {
-      console.log('Video element not available for face detection');
+      // Video element not available for face detection
       return;
     }
 
-    console.log('Starting face detection...');
+    // Starting face detection
     
     faceDetectionService.startDetection(videoRef.current, (result) => {
-      console.log('Face detection result:', result);
+      // Face detection result received
       
       if (result.error) {
-        console.error('Face detection error:', result.error);
+        // Face detection error occurred
         setFaceDetected(false);
       } else {
         const detected = result.faces > 0;
         setFaceDetected(detected);
         
-        // Send face detection data to WebSocket if connected
-        if (isConnected && result.imageData) {
+        // Send face detection data to WebSocket if connected (WITHOUT IMAGE DATA)
+        if (isConnected) {
           websocketService.send({
             type: 'face_detection',
             faces_detected: result.faces,
-            confidence: result.confidence,
-            image: result.imageData
+            confidence: result.confidence
+            // Removed image data to reduce WebSocket errors and bandwidth
           });
         }
         
@@ -128,7 +137,7 @@ export const useProctoring = (attemptId) => {
 
   const startAudioMonitoring = async (stream) => {
     try {
-      console.log('Starting audio monitoring...');
+      // Starting audio monitoring
       
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
       const analyser = audioContextRef.current.createAnalyser();
@@ -163,90 +172,76 @@ export const useProctoring = (attemptId) => {
       monitorAudio();
       return true;
     } catch (error) {
-      console.error('Audio monitoring error:', error);
+      // Audio monitoring error occurred
       return false;
     }
   };
 
-  const startProctoring = async () => {
-    console.log('Starting proctoring for attempt:', attemptId);
+  const startProctoring = useCallback(async () => {
+    // Prevent multiple simultaneous initializations
+    if (isInitialized) {
+      return false;
+    }
     
+    // Starting proctoring for attempt
     if (!attemptId) {
-      console.log('No attempt ID provided');
+      // No attempt ID provided
       return false;
     }
 
     try {
-      // Initialize media devices
+      // Initialize media devices first
       const mediaInitialized = await initializeMedia();
       if (!mediaInitialized) {
-        console.error('Failed to initialize media devices');
+        // Failed to initialize media devices
         return false;
       }
 
-      // Connect WebSocket
-      websocketService.connect(attemptId, {
-        onOpen: () => {
-          console.log('WebSocket connected');
-          setIsConnected(true);
-        },
-        onClose: () => {
-          console.log('WebSocket disconnected');
-          setIsConnected(false);
-        },
-        onMessage: (data) => {
-          console.log('WebSocket message received:', data);
-          
-          switch (data.type) {
-            case 'face_detection_result':
-              setFaceDetected(data.faces_detected === 1);
-              break;
-            case 'violation_logged':
-              setViolations(prev => [...prev, data.violation]);
-              break;
-            case 'proctoring_status':
-              // Handle proctoring status updates
-              break;
-            default:
-              console.log('Unknown message type:', data.type);
-          }
-        },
-        onError: (error) => {
-          console.error('WebSocket error:', error);
-          setError('Connection error occurred');
-        }
-      });
+      // WebSocket connection removed - violations are sent via HTTP POST instead
+      // Keeping isConnected false since we're not using WebSocket anymore
+      setIsConnected(false);
 
       setIsInitialized(true);
-      console.log('Proctoring initialized successfully');
+      // Proctoring initialized successfully
       return true;
     } catch (error) {
-      console.error('Error starting proctoring:', error);
+      // Error starting proctoring
       setError(`Failed to start proctoring: ${error.message}`);
       return false;
     }
-  };
+  }, [attemptId, isInitialized]);
 
-  const stopProctoring = () => {
-    console.log('Stopping proctoring...');
+  const stopProctoring = useCallback(() => {
+    // Stopping proctoring
     
+    // Stop face detection first
+    faceDetectionService.stopDetection();
+    audioMonitoringService.stopMonitoring();
+    
+    // Stop media tracks
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {
         track.stop();
-        console.log('Stopped track:', track.kind);
+        // Stopped track
       });
       streamRef.current = null;
     }
     
+    // Stop audio context
     if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
       audioContextRef.current.close();
       audioContextRef.current = null;
     }
     
-    faceDetectionService.stopDetection();
-    audioMonitoringService.stopMonitoring();
+    // Clear video element
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    
+    // Disconnect WebSocket
     websocketService.disconnect();
     
+    // Reset all state
     setIsInitialized(false);
     setIsConnected(false);
     setCameraEnabled(false);
@@ -254,21 +249,61 @@ export const useProctoring = (attemptId) => {
     setCameraStream(null);
     setFaceDetected(false);
     setAudioLevel(0);
+    setError('');
     
-    console.log('Proctoring stopped');
-  };
+    // Proctoring stopped
+  }, []);
 
   // Monitor tab visibility and other violations
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && isInitialized) {
-        logViolation('TAB_SWITCH', 'User switched tabs or minimized window');
+        const newCount = tabSwitchCount + 1;
+        setTabSwitchCount(newCount);
+        logViolation('TAB_SWITCH', `User switched tabs or minimized window (Count: ${newCount})`);
+        // No auto-submit - just log the violation
       }
     };
 
-    const handleWindowBlur = () => {
+    const handleWindowBlur = (e) => {
       if (isInitialized) {
-        logViolation('WINDOW_BLUR', 'Window lost focus');
+        // Ignore blur events from file inputs (file picker dialogs)
+        const activeElement = document.activeElement;
+        if (activeElement && (
+          activeElement.tagName === 'INPUT' && activeElement.type === 'file' ||
+          activeElement.closest('input[type="file"]') ||
+          activeElement.closest('label[for*="file"]') ||
+          activeElement.closest('label[for*="file-input"]')
+        )) {
+          // This is a file input click - ignore the blur event completely
+          return;
+        }
+        
+        // Longer delay to check if focus returns (file dialog can take time)
+        setTimeout(() => {
+          // Check if focus returned to the window (file dialog closed)
+          // Also check if a file input is still focused or was recently interacted with
+          const currentActive = document.activeElement;
+          const isFileInputActive = currentActive && (
+            currentActive.tagName === 'INPUT' && currentActive.type === 'file' ||
+            currentActive.closest('input[type="file"]') ||
+            currentActive.closest('label[for*="file"]')
+          );
+          
+          if (isFileInputActive || 
+              document.activeElement === document.body || 
+              document.activeElement === document.documentElement ||
+              document.hasFocus()) {
+            // Focus returned quickly or file input is active, likely just a file dialog
+            return;
+          }
+          
+          // Real blur event - user switched away
+          const newCount = tabSwitchCount + 1;
+          setTabSwitchCount(newCount);
+          logViolation('WINDOW_BLUR', `Window lost focus (Count: ${newCount})`);
+          // No auto-submit - just log the violation
+        }, 500); // Increased delay to 500ms to allow file dialog to fully open/close
       }
     };
 
@@ -323,20 +358,23 @@ export const useProctoring = (attemptId) => {
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [isInitialized, logViolation]);
+  }, [isInitialized, logViolation, tabSwitchCount, onTabSwitchLimitReached]);
 
   // Auto-start proctoring when attemptId is available
   useEffect(() => {
     if (attemptId && !isInitialized) {
-      console.log('Auto-starting proctoring for attempt:', attemptId);
-      // Add a small delay to ensure component is fully mounted
+      // Auto-starting proctoring for attempt
+      // Add a delay to ensure component is fully mounted and prevent rapid re-initialization
       const timer = setTimeout(() => {
-        startProctoring();
-      }, 1000);
+        // Double-check that we're still not initialized (prevent race conditions)
+        if (!isInitialized) {
+          startProctoring();
+        }
+      }, 1500); // Slightly increased delay
       
       return () => clearTimeout(timer);
     }
-  }, [attemptId, isInitialized]);
+  }, [attemptId, isInitialized, startProctoring]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -357,6 +395,7 @@ export const useProctoring = (attemptId) => {
     stopProctoring,
     logViolation,
     isInitialized,
-    error
+    error,
+    tabSwitchCount
   };
 };

@@ -1,0 +1,121 @@
+/* Logo Component Styles */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.logo-icon {
+  flex-shrink: 0;
+}
+
+.logo-icon svg {
+  display: block;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.logo-title {
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logo-subtitle {
+  font-size: 10px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Size variants */
+.logo-small .logo-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.logo-small .logo-title {
+  font-size: 16px;
+}
+
+.logo-medium .logo-icon svg {
+  width: 36px;
+  height: 36px;
+}
+
+.logo-medium .logo-title {
+  font-size: 20px;
+}
+
+.logo-large .logo-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.logo-large .logo-title {
+  font-size: 28px;
+}
+
+.logo-large .logo-subtitle {
+  font-size: 11px;
+}
+
+/* Hover effect */
+.logo-container:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .logo-small .logo-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .logo-small .logo-title {
+    font-size: 14px;
+  }
+
+  .logo-medium .logo-icon svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .logo-medium .logo-title {
+    font-size: 18px;
+  }
+
+  .logo-large .logo-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .logo-large .logo-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-subtitle {
+    display: none;
+  }
+
+  .logo-container {
+    gap: 8px;
+  }
+}
+

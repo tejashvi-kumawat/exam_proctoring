@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f9fafb;
   padding: 20px;
 }
 
@@ -86,9 +86,9 @@
 }
 
 .form-group input:focus {
-  border-color: #667eea;
+  border-color: var(--primary-color);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   background: #fff;
 }
 
@@ -138,7 +138,7 @@
 }
 
 .radio-option:hover {
-  border-color: #667eea;
+  border-color: var(--primary-color);
   background: #f0f8ff;
 }
 
@@ -157,8 +157,8 @@
 }
 
 .radio-option input[type="radio"]:checked + .radio-custom {
-  border-color: #667eea;
-  background: #667eea;
+  border-color: var(--primary-color);
+  background: var(--primary-color);
 }
 
 .radio-option input[type="radio"]:checked + .radio-custom::after {
@@ -191,7 +191,7 @@
 }
 
 .register-btn {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: var(--primary-color);
   color: white;
   padding: 15px 20px;
   border: none;
@@ -206,9 +206,9 @@
 }
 
 .register-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #5a6fd8, #6a42a0);
+  background: var(--primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
 }
 
 .register-btn:disabled {
@@ -232,7 +232,7 @@
 }
 
 .login-link {
-  color: #667eea;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: 600;
   margin-left: 5px;
@@ -240,7 +240,7 @@
 
 .login-link:hover {
   text-decoration: underline;
-  color: #5a6fd8;
+  color: var(--primary-dark);
 }
 
 /* Responsive Design */

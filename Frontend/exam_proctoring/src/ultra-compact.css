@@ -1,0 +1,466 @@
+/* ULTRA COMPACT & CONTENT-FOCUSED DESIGN */
+/* Minimal UI chrome, maximum content visibility */
+
+:root {
+  --compact-spacing: 6px;
+  --compact-radius: 4px;
+  --header-height: 48px;
+  --mini-button: 32px;
+}
+
+/* ========== MINIMAL HEADERS ========== */
+.header-compact-minimal {
+  height: var(--header-height);
+  padding: 6px 12px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.header-left-minimal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.header-right-minimal {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ========== ICON-ONLY BUTTONS ========== */
+.btn-icon-only {
+  width: var(--mini-button);
+  height: var(--mini-button);
+  min-width: var(--mini-button);
+  min-height: var(--mini-button);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--compact-radius);
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: #6b7280;
+}
+
+.btn-icon-only:hover {
+  background: #f3f4f6;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.btn-icon-only.primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: #667eea;
+}
+
+.btn-icon-only.primary:hover {
+  opacity: 0.9;
+}
+
+/* ========== COMPACT TEXT BUTTONS ========== */
+.btn-text-compact {
+  padding: 6px 10px;
+  font-size: 12px;
+  height: var(--mini-button);
+  min-height: var(--mini-button);
+  border-radius: var(--compact-radius);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 500;
+}
+
+.btn-text-compact:hover {
+  background: #f9fafb;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.btn-text-compact.primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: #667eea;
+}
+
+.btn-text-compact svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ========== MINIMAL BADGES ========== */
+.badge-minimal {
+  padding: 3px 8px;
+  font-size: 10px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.badge-minimal svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* ========== CONTENT-FIRST LAYOUT ========== */
+.content-focused {
+  padding: 8px 12px;
+  max-width: 100%;
+}
+
+.content-section {
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.section-header-minimal {
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.section-content {
+  padding: 10px 12px;
+}
+
+/* ========== ULTRA COMPACT CARDS ========== */
+.card-minimal {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 6px;
+  transition: all 0.15s;
+}
+
+.card-minimal:hover {
+  border-color: #667eea;
+  box-shadow: 0 1px 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ========== INLINE STATS (SUPER COMPACT) ========== */
+.stats-inline {
+  display: flex;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #f9fafb;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  overflow-x: auto;
+}
+
+.stat-mini {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: white;
+  border-radius: 3px;
+  border: 1px solid #e5e7eb;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.stat-mini-icon {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-mini-value {
+  font-weight: 700;
+  color: #111827;
+  font-size: 12px;
+}
+
+.stat-mini-label {
+  color: #9ca3af;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ========== COMPACT INFO ROW ========== */
+.info-row-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 12px;
+}
+
+.info-row-compact:last-child {
+  border-bottom: none;
+}
+
+.info-row-label {
+  color: #9ca3af;
+  font-size: 11px;
+  min-width: 80px;
+}
+
+.info-row-value {
+  color: #111827;
+  font-weight: 500;
+  flex: 1;
+}
+
+/* ========== MINIMAL NAVIGATION ========== */
+.nav-minimal {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.nav-minimal button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.nav-minimal button:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.nav-minimal button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.nav-minimal .nav-info {
+  padding: 0 8px;
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ========== COMPACT DROPDOWN/SELECT ========== */
+.select-minimal {
+  padding: 6px 10px;
+  font-size: 11px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  height: 28px;
+}
+
+.select-minimal:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* ========== MOBILE OPTIMIZATIONS ========== */
+@media (max-width: 768px) {
+  .header-compact-minimal {
+    height: 44px;
+    padding: 4px 8px;
+    gap: 6px;
+  }
+
+  .btn-icon-only {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .btn-text-compact {
+    padding: 4px 8px;
+    font-size: 11px;
+    height: 36px;
+  }
+
+  .content-focused {
+    padding: 6px 8px;
+  }
+
+  .content-section {
+    margin-bottom: 6px;
+  }
+
+  .section-header-minimal {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .section-content {
+    padding: 8px 10px;
+  }
+
+  .card-minimal {
+    padding: 6px;
+    margin-bottom: 4px;
+  }
+
+  .stats-inline {
+    padding: 4px 6px;
+    gap: 6px;
+  }
+
+  .stat-mini {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .stat-mini-value {
+    font-size: 11px;
+  }
+
+  .stat-mini-label {
+    font-size: 8px;
+  }
+
+  .info-row-compact {
+    font-size: 11px;
+    gap: 8px;
+  }
+
+  .info-row-label {
+    font-size: 10px;
+    min-width: 70px;
+  }
+
+  /* Hide text on icon buttons on mobile */
+  .btn-text-compact span {
+    display: none;
+  }
+
+  .btn-text-compact {
+    width: 36px;
+    padding: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-compact-minimal {
+    height: 40px;
+    padding: 4px 6px;
+  }
+
+  .btn-icon-only {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .btn-text-compact {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+
+  .content-focused {
+    padding: 4px 6px;
+  }
+
+  .stats-inline {
+    gap: 4px;
+  }
+
+  .stat-mini {
+    padding: 2px 5px;
+  }
+}
+
+/* ========== CONTENT PRIORITY ========== */
+/* Hide decorative elements on small screens */
+@media (max-width: 768px) {
+  .decorative,
+  .optional-info {
+    display: none !important;
+  }
+
+  /* Prioritize actual content */
+  .question-content,
+  .answer-content,
+  .exam-content {
+    padding: 8px !important;
+  }
+}
+
+/* ========== TOOLTIP FOR ICON BUTTONS ========== */
+.btn-icon-only[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: #1f2937;
+  color: white;
+  font-size: 10px;
+  border-radius: 3px;
+  white-space: nowrap;
+  margin-bottom: 4px;
+  pointer-events: none;
+}
+
+/* ========== LOADING STATE MINIMAL ========== */
+.loading-minimal {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* ========== SMOOTH TRANSITIONS ========== */
+* {
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+

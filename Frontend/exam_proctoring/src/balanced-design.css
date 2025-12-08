@@ -1,0 +1,547 @@
+/* BALANCED DESIGN - Compact but Professional */
+/* Good spacing, readable text, proper layout */
+
+:root {
+  --page-padding: 24px;
+  --content-max-width: 1400px;
+  --card-padding: 20px;
+  --spacing: 16px;
+}
+
+/* ========== PROPER PAGE LAYOUT ========== */
+.dashboard,
+.admin-panel,
+.attempt-details-redesigned,
+.exam-results-redesigned {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.content-focused,
+.dashboard-content,
+.admin-content,
+.attempt-content-redesigned,
+.results-container-redesigned {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--page-padding) !important;
+}
+
+/* ========== BETTER HEADERS ========== */
+.header-compact-minimal {
+  height: 56px;
+  padding: 12px 24px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.header-left-minimal {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.header-right-minimal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ========== REASONABLE BUTTON SIZES ========== */
+.btn-icon-only {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+}
+
+.btn-icon-only:hover {
+  background: #f3f4f6;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.btn-icon-only.primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: #667eea;
+}
+
+.btn-icon-only.primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-text-compact {
+  padding: 10px 16px;
+  font-size: 14px;
+  height: 40px;
+  min-height: 40px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btn-text-compact:hover {
+  background: #f9fafb;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.btn-text-compact.primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: #667eea;
+}
+
+.btn-text-compact.primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-text-compact svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ========== BETTER BADGES ========== */
+.badge-minimal {
+  padding: 5px 12px;
+  font-size: 11px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-minimal svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ========== COMPACT BUT READABLE STATS ========== */
+.stats-inline {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.stat-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  white-space: nowrap;
+  font-size: 13px;
+  transition: all 0.2s;
+  flex: 1;
+  min-width: 140px;
+}
+
+.stat-mini:hover {
+  border-color: #667eea;
+  background: #eef2ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.1);
+}
+
+.stat-mini-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: white;
+}
+
+.stat-mini-value {
+  font-weight: 700;
+  color: #111827;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.stat-mini-label {
+  color: #6b7280;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* ========== BETTER CONTENT SECTIONS ========== */
+.content-section {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.section-header-minimal {
+  padding: 14px 20px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.section-content {
+  padding: 20px;
+}
+
+/* ========== INFO ROWS ========== */
+.info-row-compact {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 14px;
+}
+
+.info-row-compact:last-child {
+  border-bottom: none;
+}
+
+.info-row-label {
+  color: #6b7280;
+  font-size: 13px;
+  min-width: 120px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.info-row-value {
+  color: #111827;
+  font-weight: 500;
+  flex: 1;
+}
+
+/* ========== NAVIGATION ========== */
+.nav-minimal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.nav-minimal button {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav-minimal button:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.nav-minimal button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.nav-minimal .nav-info {
+  padding: 0 12px;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ========== MOBILE RESPONSIVE (BALANCED) ========== */
+@media (max-width: 1200px) {
+  :root {
+    --content-max-width: 100%;
+    --page-padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --page-padding: 16px;
+    --card-padding: 16px;
+  }
+
+  .header-compact-minimal {
+    height: 56px;
+    padding: 8px 16px;
+  }
+
+  .content-focused,
+  .dashboard-content,
+  .admin-content,
+  .attempt-content-redesigned,
+  .results-container-redesigned {
+    padding: 16px !important;
+  }
+
+  .section-content {
+    padding: 16px;
+  }
+
+  .stats-inline {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .stat-mini {
+    min-width: 120px;
+    padding: 10px 12px;
+  }
+
+  .stat-mini-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .stat-mini-value {
+    font-size: 16px;
+  }
+
+  .info-row-compact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 0;
+  }
+
+  .info-row-label {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --page-padding: 12px;
+  }
+
+  .content-focused,
+  .dashboard-content,
+  .admin-content,
+  .attempt-content-redesigned,
+  .results-container-redesigned {
+    padding: 12px !important;
+  }
+
+  .header-compact-minimal {
+    height: 52px;
+    padding: 8px 12px;
+  }
+
+  .btn-icon-only {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .stats-inline {
+    flex-wrap: wrap;
+  }
+
+  .stat-mini {
+    flex: 1 1 calc(50% - 5px);
+    min-width: 0;
+  }
+}
+
+/* ========== BETTER TYPOGRAPHY ========== */
+body {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+h1 { font-size: 24px; font-weight: 700; }
+h2 { font-size: 20px; font-weight: 600; }
+h3 { font-size: 18px; font-weight: 600; }
+h4 { font-size: 16px; font-weight: 600; }
+h5 { font-size: 14px; font-weight: 600; }
+
+@media (max-width: 768px) {
+  h1 { font-size: 20px; }
+  h2 { font-size: 18px; }
+  h3 { font-size: 16px; }
+  h4 { font-size: 15px; }
+}
+
+/* ========== CARDS ========== */
+.card-minimal {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: var(--card-padding);
+  margin-bottom: 16px;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card-minimal:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+/* ========== FIX WELCOME TEXT ========== */
+.welcome-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ========== TOOLTIPS ========== */
+.btn-icon-only[title] {
+  position: relative;
+}
+
+.btn-icon-only[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  background: #1f2937;
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.btn-icon-only[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1f2937;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+
+/* ========== BETTER FILTER DROPDOWN ========== */
+.filter-bar-compact-attempt,
+.filter-bar-compact-results {
+  background: white;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-label-compact {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.filter-select-compact {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-select-compact:hover {
+  border-color: #667eea;
+  background: #fafbff;
+}
+
+.filter-select-compact:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+@media (max-width: 768px) {
+  .filter-bar-compact-attempt,
+  .filter-bar-compact-results {
+    padding: 12px 16px;
+  }
+
+  .filter-select-compact {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+}

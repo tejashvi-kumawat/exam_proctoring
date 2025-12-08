@@ -1,7 +1,7 @@
 /* frontend/src/components/ProctoringSetup.css */
 .proctoring-setup {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -137,12 +137,12 @@
 }
 
 .btn-primary {
-  background: #2196f3;
+  background: var(--primary-color);
   color: white;
 }
 
 .btn-primary:hover {
-  background: #1976d2;
+  background: var(--primary-dark);
 }
 
 .btn-success {
@@ -235,4 +235,144 @@
 
 .setup-step.completed .preview-video {
   border-color: #4caf50;
+}
+
+/* Comprehensive Mobile Responsiveness for ProctoringSetup */
+@media (max-width: 1024px) {
+  .proctoring-setup {
+    padding: 20px 16px;
+  }
+
+  .setup-container {
+    max-width: 600px;
+    padding: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .proctoring-setup {
+    padding: 16px 12px;
+  }
+
+  .setup-container {
+    padding: 20px 16px;
+    border-radius: 8px;
+  }
+
+  .setup-header h1 {
+    font-size: 22px;
+  }
+
+  .setup-header p {
+    font-size: 14px;
+  }
+
+  .setup-steps {
+    gap: 16px;
+  }
+
+  .step-card {
+    padding: 16px;
+  }
+
+  .step-header {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .step-content {
+    font-size: 13px;
+  }
+
+  .video-preview {
+    height: 200px;
+  }
+
+  .permissions-list {
+    gap: 10px;
+  }
+
+  .permission-item {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .rules-list li {
+    font-size: 13px;
+    padding: 8px 0;
+  }
+
+  .setup-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .setup-actions .btn {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .status-indicator {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .error-message {
+    font-size: 13px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .proctoring-setup {
+    padding: 12px 8px;
+  }
+
+  .setup-container {
+    padding: 16px 12px;
+  }
+
+  .setup-header h1 {
+    font-size: 18px;
+  }
+
+  .setup-header p {
+    font-size: 13px;
+  }
+
+  .step-card {
+    padding: 14px;
+  }
+
+  .step-header {
+    font-size: 15px;
+  }
+
+  .step-content {
+    font-size: 12px;
+  }
+
+  .video-preview {
+    height: 180px;
+  }
+
+  .permission-item {
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .rules-list li {
+    font-size: 12px;
+    padding: 6px 0;
+  }
+
+  .setup-actions .btn {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+
+  .status-indicator {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
 }

@@ -62,7 +62,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   text-align: center;
   transition: transform 0.3s ease;
-  border-left: 4px solid #2196f3;
+  border-left: 4px solid var(--primary-color);
 }
 
 .stat-card:hover {
@@ -81,7 +81,7 @@
 .stat-number {
   font-size: 42px;
   font-weight: bold;
-  color: #2196f3;
+  color: var(--primary-color);
   margin: 0;
 }
 
@@ -137,8 +137,8 @@
 }
 
 .status.started {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--gray-100);
+  color: var(--primary-color);
 }
 
 .status.in_progress {
@@ -196,7 +196,7 @@
 
 .action-card:hover {
   transform: translateY(-5px);
-  border-color: #2196f3;
+  border-color: var(--primary-color);
   box-shadow: 0 8px 25px rgba(33, 150, 243, 0.15);
 }
 
@@ -249,5 +249,247 @@
   
   .admin-header h1 {
     font-size: 24px;
+  }
+}
+
+/* Comprehensive Mobile Responsiveness for AdminPanel */
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 16px 0;
+  }
+
+  .header-content {
+    padding: 0 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .admin-header h1 {
+    font-size: 22px;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .admin-content {
+    padding: 20px 16px;
+  }
+
+  .stats-overview h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .stat-number {
+    font-size: 32px;
+  }
+
+  .stat-card h3 {
+    font-size: 12px;
+  }
+
+  .recent-attempts h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .attempts-table {
+    overflow-x: auto;
+    border-radius: 8px;
+  }
+
+  .attempts-table table {
+    min-width: 600px;
+  }
+
+  .attempts-table th,
+  .attempts-table td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .btn-sm {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-header h1 {
+    font-size: 18px;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .header-actions .btn {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .admin-content {
+    padding: 16px 12px;
+  }
+
+  .stats-overview h2,
+  .recent-attempts h2 {
+    font-size: 18px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-number {
+    font-size: 28px;
+  }
+
+  .attempts-table table {
+    min-width: 550px;
+  }
+
+  .attempts-table th,
+  .attempts-table td {
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+}
+
+/* Compact Admin Header */
+.admin-header-compact {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #667eea;
+  font-weight: 600;
+  padding: 6px 12px;
+  background: #eef2ff;
+  border-radius: 6px;
+}
+
+.header-actions-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Compact Stats */
+.admin-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px;
+}
+
+.stats-overview {
+  margin-bottom: 24px;
+}
+
+.stats-overview h2 {
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: #111827;
+  font-weight: 600;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .admin-header-compact {
+    padding: 10px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header-left-section {
+    justify-content: space-between;
+  }
+
+  .admin-badge {
+    font-size: 13px;
+    padding: 5px 10px;
+  }
+
+  .header-actions-compact {
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .header-actions-compact .btn {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .header-actions-compact .btn svg {
+    margin-right: 4px !important;
+  }
+
+  .admin-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-header-compact {
+    padding: 8px 12px;
+  }
+
+  .admin-badge {
+    font-size: 12px;
+  }
+
+  .header-actions-compact {
+    flex-direction: column;
+  }
+
+  .header-actions-compact .btn {
+    width: 100%;
   }
 }

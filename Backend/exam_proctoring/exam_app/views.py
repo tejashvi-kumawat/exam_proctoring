@@ -478,77 +478,113 @@ def exam_results(request, attempt_id):
         status='COMPLETED'
     )
     
-    # Get answers with all related data - fresh query from database
-    answers = Answer.objects.filter(attempt=attempt).select_related(
-        'question', 'selected_option'
-    ).prefetch_related('question__options', 'answer_images').order_by('question__order')
+    # Get ALL questions from the exam (to include unanswered ones)
+    all_questions = Question.objects.filter(exam=attempt.exam).prefetch_related('options').order_by('order')
     
-    # Prepare answer data with question and option details
+    # Get all answers for this attempt
+    answers_dict = {ans.question_id: ans for ans in Answer.objects.filter(attempt=attempt).select_related(
+        'question', 'selected_option'
+    ).prefetch_related('question__options', 'answer_images', 'solution_attachments')}
+    
+    # Prepare answer data with question and option details (including unanswered)
     answer_data = []
-    for answer in answers:
-        # Get all options for the question
-        question_options = list(answer.question.options.all())
+    for question in all_questions:
+        answer = answers_dict.get(question.id)
         
-        # Find the correct option
-        correct_option = next((opt for opt in question_options if opt.is_correct), None)
-        
-        # Get answer images
-        answer_images = []
-        for img in answer.answer_images.all().order_by('order'):
-            answer_images.append({
-                'id': img.id,
-                'image_url': request.build_absolute_uri(img.image.url) if img.image else None,
-                'order': img.order
-            })
-        
-        # Check if answer needs manual marking (SA or IMAGE_UPLOAD types)
-        needs_manual_marking = answer.question.question_type in ['SA', 'TEXT', 'IMAGE_UPLOAD']
-        is_manually_marked = needs_manual_marking and answer.marks_awarded is not None
-        
-        answer_info = {
-            'id': answer.id,
-            'question': {
-                'id': answer.question.id,
-                'question_text': answer.question.question_text,
-                'question_type': answer.question.question_type,
-                'question_image_url': request.build_absolute_uri(answer.question.question_image.url) if answer.question.question_image else None,
-                'marks': answer.question.marks,
-                'options': [
+        if answer:
+            # ANSWERED QUESTION
+            # Get all options for the question
+            question_options = list(answer.question.options.all())
+            
+            # Get answer images
+            answer_images = []
+            for img in answer.answer_images.all().order_by('order'):
+                answer_images.append({
+                    'id': img.id,
+                    'image_url': request.build_absolute_uri(img.image.url) if img.image else None,
+                    'order': img.order
+                })
+            
+            # Check if answer needs manual marking (SA or IMAGE_UPLOAD types)
+            needs_manual_marking = answer.question.question_type in ['SA', 'TEXT', 'IMAGE_UPLOAD']
+            is_manually_marked = needs_manual_marking and answer.marks_awarded is not None
+            
+            answer_info = {
+                'id': answer.id,
+                'question': {
+                    'id': answer.question.id,
+                    'question_text': answer.question.question_text,
+                    'question_type': answer.question.question_type,
+                    'question_image_url': request.build_absolute_uri(answer.question.question_image.url) if answer.question.question_image else None,
+                    'marks': answer.question.marks,
+                    'options': [
+                        {
+                            'id': opt.id,
+                            'option_text': opt.option_text,
+                            'option_image_url': request.build_absolute_uri(opt.option_image.url) if opt.option_image else None,
+                            'is_correct': opt.is_correct,
+                            'order': opt.order
+                        } for opt in question_options
+                    ]
+                },
+                'selected_option': {
+                    'id': answer.selected_option.id,
+                    'option_text': answer.selected_option.option_text,
+                    'option_image_url': request.build_absolute_uri(answer.selected_option.option_image.url) if answer.selected_option.option_image else None,
+                    'is_correct': answer.selected_option.is_correct
+                } if answer.selected_option else None,
+                'answer_text': answer.answer_text,
+                'answer_images': answer_images,
+                'is_correct': answer.is_correct,
+                'marks_awarded': answer.marks_awarded,
+                'needs_manual_marking': needs_manual_marking,
+                'is_manually_marked': is_manually_marked,
+                'answered_at': answer.answered_at,
+                # Include solution text & attachments only if results are released or user is admin
+                'solution_text': answer.solution_text if attempt.results_ready or is_admin_user(request.user) else None,
+                'solution_attachments': [
                     {
-                        'id': opt.id,
-                        'option_text': opt.option_text,
-                        'option_image_url': request.build_absolute_uri(opt.option_image.url) if opt.option_image else None,
-                        'is_correct': opt.is_correct,
-                        'order': opt.order
-                    } for opt in question_options
-                ]
-            },
-            'selected_option': {
-                'id': answer.selected_option.id,
-                'option_text': answer.selected_option.option_text,
-                'option_image_url': request.build_absolute_uri(answer.selected_option.option_image.url) if answer.selected_option.option_image else None,
-                'is_correct': answer.selected_option.is_correct
-            } if answer.selected_option else None,
-            'answer_text': answer.answer_text,
-            'answer_images': answer_images,
-            'is_correct': answer.is_correct,
-            'marks_awarded': answer.marks_awarded,
-            'needs_manual_marking': needs_manual_marking,
-            'is_manually_marked': is_manually_marked,
-            'answered_at': answer.answered_at,
-            # Include solution text & attachments only if results are released or user is admin
-            'solution_text': answer.solution_text if attempt.results_ready or is_admin_user(request.user) else None,
-            'solution_attachments': [
-                {
-                    'id': sa.id,
-                    'file_name': sa.file_name,
-                    'file_type': sa.file_type,
-                    'file_url': request.build_absolute_uri(sa.file.url) if sa.file else None,
-                    'uploaded_at': sa.uploaded_at.isoformat() if sa.uploaded_at else None,
-                    'uploaded_by': sa.uploaded_by.username if sa.uploaded_by else None
-                } for sa in answer.solution_attachments.all()
-            ] if (attempt.results_ready or is_admin_user(request.user)) else []
-        }
+                        'id': sa.id,
+                        'file_name': sa.file_name,
+                        'file_type': sa.file_type,
+                        'file_url': request.build_absolute_uri(sa.file.url) if sa.file else None,
+                        'uploaded_at': sa.uploaded_at.isoformat() if sa.uploaded_at else None,
+                        'uploaded_by': sa.uploaded_by.username if sa.uploaded_by else None
+                    } for sa in answer.solution_attachments.all()
+                ] if (attempt.results_ready or is_admin_user(request.user)) else []
+            }
+        else:
+            # UNANSWERED QUESTION - Create placeholder
+            answer_info = {
+                'id': None,  # No answer exists
+                'question': {
+                    'id': question.id,
+                    'question_text': question.question_text,
+                    'question_type': question.question_type,
+                    'question_image_url': request.build_absolute_uri(question.question_image.url) if question.question_image else None,
+                    'marks': question.marks,
+                    'options': [
+                        {
+                            'id': opt.id,
+                            'option_text': opt.option_text,
+                            'option_image_url': request.build_absolute_uri(opt.option_image.url) if opt.option_image else None,
+                            'is_correct': opt.is_correct,
+                            'order': opt.order
+                        } for opt in question.options.all()
+                    ]
+                },
+                'selected_option': None,
+                'answer_text': '',
+                'answer_images': [],
+                'is_correct': False,
+                'marks_awarded': 0,
+                'needs_manual_marking': question.question_type in ['SA', 'TEXT', 'IMAGE_UPLOAD'],
+                'is_manually_marked': False,
+                'answered_at': None,
+                'solution_text': None,
+                'solution_attachments': []
+            }
+        
         answer_data.append(answer_info)
     
     # Prepare attempt data with exam details

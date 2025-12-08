@@ -72,6 +72,11 @@ const ExamResults = () => {
   const showComingSoon = !resultsReady;
 
   const getAnswerStatus = (answer) => {
+    // Check if question was not answered (no answer record exists)
+    if (answer.id === null) {
+      return { status: 'not-answered', label: 'Not Answered', color: '#6b7280' };
+    }
+    
     if (answer.needs_manual_marking && !answer.is_manually_marked) {
       return { status: 'pending', label: 'Pending Review', color: '#f59e0b' };
     }

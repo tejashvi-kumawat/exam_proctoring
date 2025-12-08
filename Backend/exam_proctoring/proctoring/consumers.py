@@ -1,26 +1,43 @@
 # backend/proctoring/consumers.py
 import json
 import base64
-import cv2
-import numpy as np
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import ProctoringSession, ViolationLog, FaceDetectionLog
 from exam_app.models import ExamAttempt
+
+# Optional imports for face detection
+try:
+    import cv2
+    import numpy as np
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+    cv2 = None
+    np = None
 
 class ProctoringConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
         self.attempt_id = self.scope['url_route']['kwargs']['attempt_id']
         
+        # Debug logging
+        print(f"WebSocket connection attempt - User: {self.user}, Attempt ID: {self.attempt_id}, Anonymous: {self.user.is_anonymous}")
+        
         if self.user.is_anonymous:
-            await self.close()
+            print("WebSocket connection rejected: Anonymous user")
+            await self.close(code=4001)  # Unauthorized
             return
         
-        await self.accept()
-        
-        # Initialize proctoring session
-        await self.init_proctoring_session()
+        try:
+            await self.accept()
+            print(f"WebSocket connection accepted for user {self.user.id}, attempt {self.attempt_id}")
+            
+            # Initialize proctoring session
+            await self.init_proctoring_session()
+        except Exception as e:
+            print(f"WebSocket connection error: {e}")
+            await self.close(code=4000)  # Internal error
 
     async def disconnect(self, close_code):
         pass
@@ -47,39 +64,56 @@ class ProctoringConsumer(AsyncWebsocketConsumer):
 
     async def handle_face_detection(self, data):
         try:
-            # Decode base64 image
-            image_data = data.get('image', '').split(',')[1]
-            image_bytes = base64.b64decode(image_data)
+            # Receive face detection data WITHOUT image processing
+            # Frontend sends only face count and confidence, no image data
+            faces_detected = data.get('faces_detected', 0)
+            confidence = data.get('confidence', 0)
             
-            # Convert to OpenCV format
-            nparr = np.frombuffer(image_bytes, np.uint8)
-            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            # Log face detection (without image processing)
+            await self.log_face_detection(faces_detected, confidence)
             
-            # Face detection using OpenCV
-            face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+            # Check for violations based on face count
+            if faces_detected == 0:
+                violation = await self.log_violation('FACE_NOT_DETECTED', 'No face detected')
+                # notify admins watching this attempt
+                await self.channel_layer.group_send(
+                    f'admin_attempt_{self.attempt_id}',
+                    {
+                        'type': 'attempt_update',
+                        'data': {
+                            'event': 'violation',
+                            'violation': violation,
+                            'attempt_id': int(self.attempt_id)
+                        }
+                    }
+                )
+            elif faces_detected > 1:
+                violation = await self.log_violation('MULTIPLE_FACES', f'{faces_detected} faces detected')
+                await self.channel_layer.group_send(
+                    f'admin_attempt_{self.attempt_id}',
+                    {
+                        'type': 'attempt_update',
+                        'data': {
+                            'event': 'violation',
+                            'violation': violation,
+                            'attempt_id': int(self.attempt_id)
+                        }
+                    }
+                )
             
-            faces_count = len(faces)
-            confidence = 0.8 if faces_count == 1 else 0.3
-            
-            # Log face detection
-            await self.log_face_detection(faces_count, confidence)
-            
-            # Check for violations
-            if faces_count == 0:
-                await self.log_violation('FACE_NOT_DETECTED', 'No face detected in frame')
-            elif faces_count > 1:
-                await self.log_violation('MULTIPLE_FACES', f'{faces_count} faces detected')
-            
+            # Send acknowledgment back
             await self.send(text_data=json.dumps({
                 'type': 'face_detection_result',
-                'faces_detected': faces_count,
+                'faces_detected': faces_detected,
                 'confidence': confidence
             }))
             
         except Exception as e:
             print(f"Face detection error: {e}")
+            await self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': f'Face detection error: {str(e)}'
+            }))
 
     async def handle_audio_monitoring(self, data):
         try:
@@ -91,7 +125,18 @@ class ProctoringConsumer(AsyncWebsocketConsumer):
             await self.log_audio_monitoring(noise_level, threshold_exceeded)
             
             if threshold_exceeded:
-                await self.log_violation('NOISE_DETECTED', f'Noise level: {noise_level}')
+                violation = await self.log_violation('NOISE_DETECTED', f'Noise level: {noise_level}')
+                await self.channel_layer.group_send(
+                    f'admin_attempt_{self.attempt_id}',
+                    {
+                        'type': 'attempt_update',
+                        'data': {
+                            'event': 'violation',
+                            'violation': violation,
+                            'attempt_id': int(self.attempt_id)
+                        }
+                    }
+                )
             
         except Exception as e:
             print(f"Audio monitoring error: {e}")
@@ -99,8 +144,19 @@ class ProctoringConsumer(AsyncWebsocketConsumer):
     async def handle_violation(self, data):
         violation_type = data.get('violation_type')
         description = data.get('description', '')
-        
-        await self.log_violation(violation_type, description)
+        violation = await self.log_violation(violation_type, description)
+        # notify admins for this attempt
+        await self.channel_layer.group_send(
+            f'admin_attempt_{self.attempt_id}',
+            {
+                'type': 'attempt_update',
+                'data': {
+                    'event': 'violation',
+                    'violation': violation,
+                    'attempt_id': int(self.attempt_id)
+                }
+            }
+        )
 
     @database_sync_to_async
     def init_proctoring_session(self):
@@ -148,9 +204,17 @@ class ProctoringConsumer(AsyncWebsocketConsumer):
             'NOISE_DETECTED': 'MEDIUM',
         }
         
-        ViolationLog.objects.create(
+        v = ViolationLog.objects.create(
             session=self.session,
             violation_type=violation_type,
             description=description,
             severity=severity_map.get(violation_type, 'MEDIUM')
         )
+        # return a serializable dict so async code can broadcast it
+        return {
+            'id': v.id,
+            'violation_type': v.violation_type,
+            'description': v.description,
+            'severity': v.severity,
+            'timestamp': v.timestamp.isoformat() if v.timestamp else None
+        }

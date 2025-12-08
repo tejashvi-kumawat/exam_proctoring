@@ -18,7 +18,7 @@ build/
 *.whl
 
 # Virtual Environment
-Backend/exam_proctoring_env/
+Backend/exam_proctoring_env
 venv/
 env/
 ENV/

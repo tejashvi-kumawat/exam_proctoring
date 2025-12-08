@@ -67,14 +67,29 @@ DATABASES = {
 }
 
 # Channels Configuration
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+# Use in-memory channel layer for development (no Redis required)
+# For production, use Redis: 'BACKEND': 'channels_redis.core.RedisChannelLayer'
+try:
+    import redis
+    r = redis.Redis(host='127.0.0.1', port=6379, socket_connect_timeout=1)
+    r.ping()
+    r.close()
+    # Redis is available, use it
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                "hosts": [('127.0.0.1', 6379)],
+            },
         },
-    },
-}
+    }
+except (redis.ConnectionError, redis.TimeoutError, ImportError, Exception):
+    # Redis not available, use in-memory channel layer
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [

@@ -3,6 +3,8 @@ channels==4.2.2
 channels_redis==4.2.1
 dataclasses==0.6
 Django==5.2.1
+uvicorn==0.34.0
+uvicorn[standard]==0.34.0
 django-cors-headers==4.7.0
 djangorestframework==3.16.0
 djongo==1.2.31
@@ -14,3 +16,5 @@ python-decouple==3.8
 pytz==2025.2
 redis==6.2.0
 sqlparse==0.5.3
+requests==2.32.3
+python-docx==1.1.2

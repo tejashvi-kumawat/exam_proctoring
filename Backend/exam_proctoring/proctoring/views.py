@@ -10,6 +10,8 @@ from .serializers import (
     ProctoringSessionSerializer, ViolationLogSerializer, 
     FaceDetectionLogSerializer, AudioMonitoringLogSerializer
 )
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -89,6 +91,23 @@ def report_violation(request):
         )
         
         serializer = ViolationLogSerializer(violation)
+        # Broadcast to admin monitoring group so admins receive realtime updates
+        try:
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'admin_attempt_{attempt_id}',
+                {
+                    'type': 'attempt_update',
+                    'data': {
+                        'event': 'violation',
+                        'violation': serializer.data,
+                        'attempt_id': attempt_id,
+                    }
+                }
+            )
+        except Exception:
+            # Don't fail the API if broadcasting fails
+            pass
         return Response(serializer.data, status=status.HTTP_201_CREATED)
         
     except ProctoringSession.DoesNotExist:

@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "question_text": "What is 2 + 2?",
+      "question_type": "MCQ",
+      "marks": 1,
+      "order": 1,
+      "options": [
+        {
+          "option_text": "3",
+          "is_correct": false,
+          "order": 0
+        },
+        {
+          "option_text": "4",
+          "is_correct": true,
+          "order": 1
+        },
+        {
+          "option_text": "5",
+          "is_correct": false,
+          "order": 2
+        },
+        {
+          "option_text": "6",
+          "is_correct": false,
+          "order": 3
+        }
+      ]
+    },
+    {
+      "question_text": "Python is a programming language",
+      "question_type": "TF",
+      "marks": 1,
+      "order": 2,
+      "options": [
+        {
+          "option_text": "True",
+          "is_correct": true,
+          "order": 0
+        },
+        {
+          "option_text": "False",
+          "is_correct": false,
+          "order": 1
+        }
+      ]
+    },
+    {
+      "question_text": "What is the capital of France?",
+      "question_type": "SA",
+      "marks": 2,
+      "order": 3
+    },
+    {
+      "question_text": "Explain the concept of object-oriented programming with examples",
+      "question_type": "TEXT",
+      "marks": 10,
+      "order": 4
+    },
+    {
+      "question_text": "Upload a screenshot of your code implementation",
+      "question_type": "IMAGE_UPLOAD",
+      "marks": 5,
+      "order": 5
+    }
+  ]
+}
+

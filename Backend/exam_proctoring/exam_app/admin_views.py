@@ -432,11 +432,15 @@ def manage_question(request, question_id):
                     if parsed_options:
                         options_data = [parsed_options[i] for i in sorted(parsed_options.keys())]
                 
+                print(f"DEBUG: Parsed {len(options_data)} options for question {question.id}")
+                for i, opt in enumerate(options_data):
+                    print(f"  Option {i}: text='{opt.get('option_text')}', is_correct={opt.get('is_correct')}")
+                
                 # Get option images if any
                 option_images = request.FILES.getlist('option_images') if 'option_images' in request.FILES else []
                 
                 for i, option_data in enumerate(options_data):
-                    option_text = option_data.get('option_text', '')
+                    option_text = option_data.get('option_text', '').strip()
                     # Parse is_correct - handle both boolean and string formats
                     is_correct = option_data.get('is_correct', False)
                     if isinstance(is_correct, str):
@@ -452,8 +456,12 @@ def manage_question(request, question_id):
                         if i in existing_option_images:
                             option_image = existing_option_images[i]
                     
-                    # Only create options with text or image
-                    if option_text or option_image:
+                    # Create option if it has text (after stripping) OR an image
+                    # Use len() check to be explicit, not truthiness
+                    has_text = len(option_text) > 0
+                    has_image = option_image is not None
+                    
+                    if has_text or has_image:
                         Option.objects.create(
                             question=question,
                             option_text=option_text,

@@ -213,15 +213,28 @@ const saveQuestion = async () => {
         formData.append('question_image', questionForm.question_image);
       }
       
-      // Add options - include options with text OR images (new or existing)
-      const validOptions = questionForm.options.filter(opt => 
-        opt.option_text.trim() || 
-        opt.option_image instanceof File || 
-        (opt.option_image && typeof opt.option_image === 'string') // Existing image URL
-      );
+      // When editing: send ALL existing options to preserve them
+      // When creating: only send non-empty options
+      let validOptions;
+      if (editingQuestion) {
+        // EDIT MODE: Include ALL options to preserve the structure
+        validOptions = questionForm.options.filter(opt => {
+          const hasText = opt.option_text && opt.option_text.trim();
+          const hasNewImage = opt.option_image instanceof File;
+          const hasExistingImage = opt.option_image && typeof opt.option_image === 'string';
+          return hasText || hasNewImage || hasExistingImage;
+        });
+      } else {
+        // CREATE MODE: Only non-empty options
+        validOptions = questionForm.options.filter(opt => 
+          opt.option_text.trim() || opt.option_image instanceof File
+        );
+      }
+      
+      console.log('Sending options:', validOptions.length, validOptions); // Debug log
       
       validOptions.forEach((option, index) => {
-        formData.append(`options[${index}][option_text]`, option.option_text.trim() || '');
+        formData.append(`options[${index}][option_text]`, option.option_text || '');
         formData.append(`options[${index}][is_correct]`, option.is_correct ? 'true' : 'false');
         
         // Handle option images

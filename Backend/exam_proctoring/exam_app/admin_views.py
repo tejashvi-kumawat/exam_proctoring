@@ -327,23 +327,42 @@ def create_question(request):
             
             # Create options if provided
             options_data = request.data.get('options', [])
+            
+            # Try JSON string format first (new approach)
+            if not options_data and 'options_json' in request.data:
+                import json
+                try:
+                    options_data = json.loads(request.data.get('options_json'))
+                    print(f"Parsed options from JSON string: {len(options_data)} options")
+                except json.JSONDecodeError as e:
+                    print(f"Error parsing options_json: {e}")
+                    options_data = []
+            
             for i, option_data in enumerate(options_data):
-                if option_data.get('option_text') or (isinstance(option_data, dict) and 'option_image' in option_data):  # Allow image-only options
-                    option_image = None
-                    if isinstance(option_data, dict) and 'option_image' in request.FILES:
-                        # Handle option images from form data
-                        option_images = request.FILES.getlist('option_images')
-                        if i < len(option_images):
-                            option_image = option_images[i]
-                    
+                option_text = option_data.get('option_text', '').strip() if isinstance(option_data, dict) else str(option_data).strip()
+                is_correct = option_data.get('is_correct', False) if isinstance(option_data, dict) else False
+                
+                # Handle option image - check indexed key first (option_image_0, option_image_1)
+                option_image = None
+                image_key = f'option_image_{i}'
+                if image_key in request.FILES:
+                    option_image = request.FILES[image_key]
+                    print(f"  - New image for option {i}")
+                elif 'option_images' in request.FILES:
+                    # Fallback to old list format
+                    option_images = request.FILES.getlist('option_images')
+                    if i < len(option_images):
+                        option_image = option_images[i]
+                
+                if option_text or option_image:
                     Option.objects.create(
                         question=question,
-                        option_text=option_data.get('option_text', '') if isinstance(option_data, dict) else str(option_data),
+                        option_text=option_text,
                         option_image=option_image,
-                        is_correct=option_data.get('is_correct', False) if isinstance(option_data, dict) else False,
+                        is_correct=bool(is_correct),
                         order=i
                     )
-                    print(f"Created option: {option_data.get('option_text', 'Image option')}")
+                    print(f"Created option {i}: '{option_text[:30]}...'  (correct={is_correct})")
             
             # Update exam total marks if auto_calculate_total is enabled
             exam.refresh_from_db()

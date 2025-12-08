@@ -403,121 +403,101 @@ def manage_question(request, question_id):
         print(f"Managing question: {question.id}")
         
         if request.method == 'PUT':
-            # Handle question image update if provided
+            print(f"\n=== UPDATING QUESTION {question.id} ===")
+            
+            # Step 1: Save existing option images (before deletion)
+            existing_images = {}
+            for idx, opt in enumerate(question.options.all().order_by('order')):
+                if opt.option_image:
+                    existing_images[idx] = opt.option_image
+                    print(f"  Saved image ref for option {idx}")
+            
+            # Step 2: Update question basic fields
+            question.question_text = request.data.get('question_text', question.question_text)
+            question.question_type = request.data.get('question_type', question.question_type)
+            question.marks = request.data.get('marks', question.marks)
+            question.order = request.data.get('order', question.order)
+            
+            # Update question image if new one uploaded
             if 'question_image' in request.FILES:
                 question.question_image = request.FILES['question_image']
-                question.save()
+                print("  New question image uploaded")
             
-            # Update question
-            question_data = {
-                'question_text': request.data.get('question_text', question.question_text),
-                'question_type': request.data.get('question_type', question.question_type),
-                'marks': request.data.get('marks', question.marks),
-                'order': request.data.get('order', question.order)
-            }
+            question.save()
+            print(f"  Question basic fields updated")
             
-            serializer = QuestionSerializer(question, data=question_data, partial=True)
-            if serializer.is_valid():
-                question = serializer.save()
-                
-                # Store existing option images before deletion (to preserve them)
-                existing_option_images = {}
-                for idx, opt in enumerate(question.options.all().order_by('order')):
-                    if opt.option_image:
-                        existing_option_images[idx] = opt.option_image
-                
-                # Update options
-                question.options.all().delete()  # Remove existing options
-                
-                # Parse options - try multiple formats
+            # Step 3: Delete old options
+            question.options.all().delete()
+            print(f"  Deleted old options")
+            
+            # Step 4: Parse new options data
+            options_data = []
+            
+            # Try options_json first (FormData with images)
+            if 'options_json' in request.data:
+                import json
+                try:
+                    options_data = json.loads(request.data.get('options_json'))
+                    print(f"  Parsed {len(options_data)} options from options_json")
+                except:
+                    pass
+            
+            # Fallback to direct options array (JSON request)
+            if not options_data:
                 options_data = request.data.get('options', [])
+                if options_data:
+                    print(f"  Got {len(options_data)} options from direct array")
+            
+            # Step 5: Create new options
+            for i, opt_data in enumerate(options_data):
+                opt_text = opt_data.get('option_text', '').strip() if isinstance(opt_data, dict) else str(opt_data).strip()
+                opt_is_correct = opt_data.get('is_correct', False) if isinstance(opt_data, dict) else False
                 
-                # Try JSON string format (new cleaner approach)
-                if not options_data and 'options_json' in request.data:
-                    import json
-                    try:
-                        options_data = json.loads(request.data.get('options_json'))
-                        print(f"Parsed options from JSON string: {len(options_data)} options")
-                    except json.JSONDecodeError as e:
-                        print(f"Error parsing options_json: {e}")
-                        options_data = []
+                # Handle boolean from string
+                if isinstance(opt_is_correct, str):
+                    opt_is_correct = opt_is_correct.lower() in ['true', '1', 'yes']
                 
-                # Fallback: Parse FormData format: options[0][option_text], etc.
-                if not options_data:
-                    parsed_options = {}
-                    for key in request.data.keys():
-                        if key.startswith('options['):
-                            # Extract index and field name from 'options[0][option_text]'
-                            import re
-                            match = re.match(r'options\[(\d+)\]\[(\w+)\]', key)
-                            if match:
-                                index = int(match.group(1))
-                                field = match.group(2)
-                                if index not in parsed_options:
-                                    parsed_options[index] = {}
-                                parsed_options[index][field] = request.data.get(key)
-                    
-                    # Convert dict to list
-                    if parsed_options:
-                        options_data = [parsed_options[i] for i in sorted(parsed_options.keys())]
-                        print(f"Parsed options from FormData keys: {len(options_data)} options")
+                # Determine image for this option
+                opt_image = None
+                image_key = f'option_image_{i}'
                 
-                print(f"DEBUG: Total {len(options_data)} options parsed for question {question.id}")
-                for i, opt in enumerate(options_data):
-                    print(f"  Option {i}: text='{opt.get('option_text')}', is_correct={opt.get('is_correct')}")
+                if image_key in request.FILES:
+                    # New image uploaded
+                    opt_image = request.FILES[image_key]
+                    print(f"    Option {i}: NEW image")
+                elif isinstance(opt_data, dict) and opt_data.get('has_existing_image') and i in existing_images:
+                    # Preserve existing image
+                    opt_image = existing_images[i]
+                    print(f"    Option {i}: PRESERVED image")
                 
-                # Create options from parsed data
-                created_count = 0
-                for i, option_data in enumerate(options_data):
-                    option_text = option_data.get('option_text', '').strip()
-                    
-                    # Parse is_correct - handle both boolean and string formats
-                    is_correct = option_data.get('is_correct', False)
-                    if isinstance(is_correct, str):
-                        is_correct = is_correct.lower() in ['true', '1', 'yes']
-                    
-                    # Determine option image
-                    option_image = None
-                    
-                    # Check for new image upload (indexed: option_image_0, option_image_1)
-                    image_key = f'option_image_{i}'
-                    if image_key in request.FILES:
-                        option_image = request.FILES[image_key]
-                    # Check if existing image should be preserved
-                    elif option_data.get('has_existing_image') and i in existing_option_images:
-                        option_image = existing_option_images[i]
-                    
-                    # ALWAYS create option if it has text (even if empty after strip)
-                    # This ensures MCQ options are never lost
-                    if option_text or option_image:
-                        Option.objects.create(
-                            question=question,
-                            option_text=option_text,
-                            option_image=option_image,
-                            is_correct=bool(is_correct),
-                            order=i
-                        )
-                        created_count += 1
-                        print(f"  ✓ Created option {i}: '{option_text[:40]}' (correct={is_correct}, has_image={option_image is not None})")
-                
-                print(f"  ✓ Total {created_count} options created for question {question.id}")
-                
-                # Update exam total marks if auto_calculate_total is enabled
-                exam.refresh_from_db()
-                if exam.auto_calculate_total:
-                    calculated_total = exam.calculate_total_marks()
-                    if calculated_total > 0:
-                        exam.total_marks = calculated_total
-                        exam.save()
-                
-                question_with_options = QuestionSerializer(question, context={'request': request}).data
-                response_data = question_with_options
-                response_data['exam_total_marks'] = exam.total_marks
-                response_data['calculated_total_marks'] = exam.calculate_total_marks()
-                
-                return Response(response_data)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                # Create option (if has text OR image)
+                if opt_text or opt_image:
+                    Option.objects.create(
+                        question=question,
+                        option_text=opt_text,
+                        is_correct=bool(opt_is_correct),
+                        option_image=opt_image,
+                        order=i
+                    )
+                    print(f"  ✓ Created option {i}: '{opt_text[:40]}' (correct={opt_is_correct})")
+            
+            print(f"=== FINISHED UPDATING QUESTION {question.id} ===\n")
+            
+            # Update exam total marks if auto_calculate_total is enabled
+            exam = question.exam
+            exam.refresh_from_db()
+            if exam.auto_calculate_total:
+                calculated_total = exam.calculate_total_marks()
+                if calculated_total > 0:
+                    exam.total_marks = calculated_total
+                    exam.save()
+            
+            # Return updated question with options
+            question_data = QuestionSerializer(question, context={'request': request}).data
+            question_data['exam_total_marks'] = exam.total_marks
+            question_data['calculated_total_marks'] = exam.calculate_total_marks()
+            
+            return Response(question_data)
         
         elif request.method == 'DELETE':
             question.delete()
@@ -531,51 +511,6 @@ def manage_question(request, question_id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-
-@api_view(['PUT', 'DELETE'])
-@permission_classes([IsAuthenticated])
-def manage_question(request, question_id):
-    """Update or delete a question"""
-    try:
-        if not is_admin_user(request.user):
-            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-        
-        question = get_object_or_404(Question, id=question_id)
-        
-        if request.method == 'PUT':
-            # Preserve the original order if not explicitly provided
-            original_order = question.order
-            data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
-            
-            # If order is not in the request, use the original order
-            if 'order' not in data:
-                data['order'] = original_order
-            
-            serializer = QuestionSerializer(question, data=data, partial=True)
-            if serializer.is_valid():
-                question = serializer.save()
-                
-                # Update options
-                question.options.all().delete()  # Remove existing options
-                options_data = request.data.get('options', [])
-                for option_data in options_data:
-                    Option.objects.create(
-                        question=question,
-                        option_text=option_data.get('option_text', ''),
-                        is_correct=option_data.get('is_correct', False),
-                        order=option_data.get('order', 0)
-                    )
-                
-                return Response(QuestionSerializer(question).data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        elif request.method == 'DELETE':
-            question.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-    except Exception as e:
-        print(f"Error in manage_question: {e}")
-        print(traceback.format_exc())
-        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

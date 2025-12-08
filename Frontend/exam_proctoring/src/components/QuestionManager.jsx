@@ -180,124 +180,118 @@ const QuestionManager = () => {
     }));
   };
 
-// frontend/src/components/QuestionManager.jsx (update saveQuestion function)
 const saveQuestion = async () => {
   try {
-    // Validate form data
+    // Validate
     if (!questionForm.question_text.trim()) {
-      setErrors({ question_text: 'Question text is required' });
+      toast.error('Question text is required');
       return;
     }
     
     if (!selectedExam) {
-      setErrors({ general: 'Please select an exam first' });
+      toast.error('Please select an exam first');
       return;
     }
     
-    // SIMPLIFIED APPROACH: Always use FormData when editing (to handle any image updates)
-    const hasQuestionImage = questionForm.question_image instanceof File;
-    const hasOptionImages = questionForm.options.some(opt => opt.option_image instanceof File);
+    // Determine if we need FormData (for image uploads)
+    const hasNewQuestionImage = questionForm.question_image instanceof File;
+    const hasNewOptionImages = questionForm.options.some(opt => opt.option_image instanceof File);
     
-    // Use FormData if ANY images are involved
-    if (hasQuestionImage || hasOptionImages) {
+    if (hasNewQuestionImage || hasNewOptionImages) {
+      // === FormData Approach (when uploading images) ===
       const formData = new FormData();
+      
+      // Basic question data
       formData.append('exam', selectedExam.id);
       formData.append('question_text', questionForm.question_text.trim());
       formData.append('question_type', questionForm.question_type);
       formData.append('marks', parseInt(questionForm.marks));
       
       if (!editingQuestion) {
+        
         formData.append('order', questions.length);
       }
       
-      if (hasQuestionImage) {
+      // Question image
+      if (hasNewQuestionImage) {
         formData.append('question_image', questionForm.question_image);
       }
       
-      // CRITICAL FIX: Send ALL options, not just valid ones
-      // Filter should ONLY remove completely empty slots
-      const allOptions = questionForm.options.map(opt => ({
-        option_text: (opt.option_text || '').trim(),
-        is_correct: !!opt.is_correct,
-        has_existing_image: opt.option_image && typeof opt.option_image === 'string'
-      })).filter(opt => 
-        // Only remove if BOTH text is empty AND no image
-        opt.option_text.length > 0 || opt.has_existing_image
-      );
+      // Options - send as JSON string for clean parsing
+      const optionsToSend = questionForm.options
+        .map(opt => ({
+          option_text: (opt.option_text || '').trim(),
+          is_correct: !!opt.is_correct,
+          has_existing_image: !!(opt.option_image && typeof opt.option_image === 'string')
+        }))
+        .filter(opt => opt.option_text.length > 0 || opt.has_existing_image);
       
-      formData.append('options_json', JSON.stringify(allOptions));
+      formData.append('options_json', JSON.stringify(optionsToSend));
       
-      // Append new option images with indexed keys
-      questionForm.options.forEach((option, index) => {
-        if (option.option_image instanceof File) {
-          formData.append(`option_image_${index}`, option.option_image);
+      // New option images (indexed)
+      questionForm.options.forEach((opt, idx) => {
+        if (opt.option_image instanceof File) {
+          formData.append(`option_image_${idx}`, opt.option_image);
         }
       });
       
-      let response;
-      if (editingQuestion) {
-        response = await api.put(`/exam/admin/questions/${editingQuestion.id}/`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-      } else {
-        response = await api.post('/exam/admin/questions/', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-      }
+      // Send request
+      const url = editingQuestion 
+        ? `/exam/admin/questions/${editingQuestion.id}/`
+        : '/exam/admin/questions/';
       
-      toast.success(editingQuestion ? 'Question updated successfully' : 'Question added successfully');
-      fetchQuestions(selectedExam.id);
-      resetForm();
+      await api({
+        method: editingQuestion ? 'put' : 'post',
+        url: url,
+        data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      toast.success(editingQuestion ? 'Question updated' : 'Question added');
+      
     } else {
-      // Regular JSON request
+      // === JSON Approach (no image uploads) ===
       const questionData = {
         exam: selectedExam.id,
         question_text: questionForm.question_text.trim(),
         question_type: questionForm.question_type,
         marks: parseInt(questionForm.marks),
-        options: questionForm.options.filter(opt => opt.option_text.trim()).map(opt => ({
-          option_text: opt.option_text.trim(),
-          is_correct: opt.is_correct
-        }))
+        options: questionForm.options
+          .filter(opt => (opt.option_text || '').trim().length > 0)
+          .map(opt => ({
+            option_text: opt.option_text.trim(),
+            is_correct: !!opt.is_correct
+          }))
       };
       
-      // Only set order for NEW questions, preserve order for editing
       if (!editingQuestion) {
         questionData.order = questions.length;
       }
       
-      console.log('Sending question data:', questionData);
+      const url = editingQuestion 
+        ? `/exam/admin/questions/${editingQuestion.id}/`
+        : '/exam/admin/questions/';
       
-      let response;
-      if (editingQuestion) {
-        response = await api.put(`/exam/admin/questions/${editingQuestion.id}/`, questionData);
-      } else {
-        response = await api.post('/exam/admin/questions/', questionData);
-      }
+      await api({
+        method: editingQuestion ? 'put' : 'post',
+        url: url,
+        data: questionData
+      });
       
-      console.log('Question saved successfully:', response.data);
-      toast.success(editingQuestion ? 'Question updated successfully' : 'Question added successfully');
-      
-      // Refresh exam data to get updated total_marks if auto-calculated
-      const examResponse = await api.get(`/exam/admin/exams/${selectedExam.id}/`);
-      setSelectedExam(examResponse.data);
-      
-      fetchQuestions(selectedExam.id);
-      resetForm();
+      toast.success(editingQuestion ? 'Question updated' : 'Question added');
     }
+    
+    // Refresh and close
+    await fetchQuestions(selectedExam.id);
+    if (editingQuestion) {
+      const examResp = await api.get(`/exam/admin/exams/${selectedExam.id}/`);
+      setSelectedExam(examResp.data);
+    }
+    resetForm();
     
   } catch (error) {
-    console.error('Error saving question:', error);
-    
-    if (error.response?.data) {
-      console.error('Error details:', error.response.data);
-      const errorMessage = typeof error.response.data === 'string' 
-        ? error.response.data 
-        : error.response.data.error || JSON.stringify(error.response.data);
-      setErrors({ general: errorMessage });
-    } else {
-      setErrors({ general: 'Failed to save question. Please try again.' });
-    }
+    console.error('Save error:', error);
+    toast.error(error.response?.data?.error || 'Failed to save question');
   }
 };
 

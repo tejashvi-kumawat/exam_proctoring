@@ -24,6 +24,7 @@ env/
 ENV/
 .venv
 
+
 # Django
 *.log
 db.sqlite3

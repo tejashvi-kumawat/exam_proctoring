@@ -1,11 +1,15 @@
 // frontend/src/services/api.js
 import axios from 'axios';
 
+// Use environment variable or fallback to PythonAnywhere backend
+const API_URL = import.meta.env.VITE_API_URL || 'https://exam0proctoring.pythonanywhere.com/api/';
+
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/',  // Make sure this matches your Django server
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,  // Important for CORS with credentials
 });
 
 // Request interceptor

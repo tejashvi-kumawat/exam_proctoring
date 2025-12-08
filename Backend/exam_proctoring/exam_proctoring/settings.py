@@ -8,7 +8,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='your-secret-key-here')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', "*", "https://exam-proctoring-ilwz.onrender.com"]
+ALLOWED_HOSTS = [
+    'localhost', 
+    '127.0.0.1', 
+    '0.0.0.0',
+    'exam0proctoring.pythonanywhere.com',
+    '.pythonanywhere.com',  # Allow all PythonAnywhere subdomains
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -95,8 +101,7 @@ except (redis.ConnectionError, redis.TimeoutError, ImportError, Exception):
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://exam-proctoring.vercel.app",
-    "https://exam-proctoring-ilwz.onrender.com"
+    "https://exam-proctoring.vercel.app",  # Your Vercel frontend
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -115,7 +120,8 @@ REST_FRAMEWORK = {
     ],
 }
 CSRF_TRUSTED_ORIGINS = [
-    "https://exam-proctoring-ilwz.onrender.com",
+    "https://exam-proctoring.vercel.app",
+    "https://exam0proctoring.pythonanywhere.com",
 ]
 
 # Media and Static Files

@@ -29,9 +29,13 @@ class WebSocketService {
 
     // Get auth token from localStorage
     const token = localStorage.getItem('token');
+    
+    // Use environment variable or fallback to PythonAnywhere (note: WebSockets require paid plan)
+    const WS_BASE_URL = import.meta.env.VITE_WS_URL || 'wss://exam0proctoring.pythonanywhere.com';
+    
     const wsUrl = token 
-      ? `ws://localhost:8000/ws/proctoring/${attemptId}/?token=${token}`
-      : `ws://localhost:8000/ws/proctoring/${attemptId}/`;
+      ? `${WS_BASE_URL}/ws/proctoring/${attemptId}/?token=${token}`
+      : `${WS_BASE_URL}/ws/proctoring/${attemptId}/`;
     
     this.isConnecting = true;
     

@@ -31,22 +31,10 @@ export const useProctoring = (attemptId, onTabSwitchLimitReached = null) => {
     
     setViolations(prev => [...prev, violation]);
     
-    // Send violation directly to backend via HTTP POST instead of WebSocket
-    if (attemptId) {
-      try {
-        await api.post('/proctoring/violations/report/', {
-          attempt_id: attemptId,
-          violation_type: violationType,
-          description: description,
-          timestamp: violation.timestamp,
-          severity: 'MEDIUM'
-        });
-      } catch (error) {
-        // Silently handle errors - violations are logged locally anyway
-        console.error('Failed to report violation to backend:', error);
-      }
-    }
-  }, [attemptId]);
+    // Violation logging disabled for backend to reduce load
+    // Violations are still tracked locally in state
+    // Backend reporting can be enabled later if needed
+  }, []);
 
   const initializeMedia = async () => {
     try {

@@ -283,10 +283,6 @@ const saveQuestion = async () => {
     
     // Refresh and close
     await fetchQuestions(selectedExam.id);
-    if (editingQuestion) {
-      const examResp = await api.get(`/exam/admin/exams/${selectedExam.id}/`);
-      setSelectedExam(examResp.data);
-    }
     resetForm();
     
   } catch (error) {

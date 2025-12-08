@@ -213,11 +213,18 @@ const saveQuestion = async () => {
         formData.append('question_image', questionForm.question_image);
       }
       
-      // Add options
-      const validOptions = questionForm.options.filter(opt => opt.option_text.trim() || opt.option_image instanceof File);
+      // Add options - include options with text OR images (new or existing)
+      const validOptions = questionForm.options.filter(opt => 
+        opt.option_text.trim() || 
+        opt.option_image instanceof File || 
+        (opt.option_image && typeof opt.option_image === 'string') // Existing image URL
+      );
+      
       validOptions.forEach((option, index) => {
         formData.append(`options[${index}][option_text]`, option.option_text.trim() || '');
-        formData.append(`options[${index}][is_correct]`, option.is_correct);
+        formData.append(`options[${index}][is_correct]`, option.is_correct ? 'true' : 'false');
+        
+        // Only append new image files, not existing URLs
         if (option.option_image instanceof File) {
           formData.append(`option_images`, option.option_image);
         }

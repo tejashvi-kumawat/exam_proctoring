@@ -466,7 +466,8 @@ def manage_question(request, question_id):
                 for i, opt in enumerate(options_data):
                     print(f"  Option {i}: text='{opt.get('option_text')}', is_correct={opt.get('is_correct')}")
                 
-                # Process each option
+                # Create options from parsed data
+                created_count = 0
                 for i, option_data in enumerate(options_data):
                     option_text = option_data.get('option_text', '').strip()
                     
@@ -478,28 +479,17 @@ def manage_question(request, question_id):
                     # Determine option image
                     option_image = None
                     
-                    # Check for new image with index-based key (option_image_0, option_image_1, etc.)
+                    # Check for new image upload (indexed: option_image_0, option_image_1)
                     image_key = f'option_image_{i}'
                     if image_key in request.FILES:
                         option_image = request.FILES[image_key]
-                        print(f"  - New image uploaded for option {i}")
-                    # Check if we should preserve existing image
+                    # Check if existing image should be preserved
                     elif option_data.get('has_existing_image') and i in existing_option_images:
                         option_image = existing_option_images[i]
-                        print(f"  - Preserving existing image for option {i}")
-                    # Fallback: old format with option_images list
-                    elif 'option_images' in request.FILES:
-                        option_images_list = request.FILES.getlist('option_images')
-                        if i < len(option_images_list):
-                            option_image = option_images_list[i]
                     
-                    # Create option if it has ANY content
-                    has_text = len(option_text) > 0
-                    has_image = option_image is not None
-                    
-                    print(f"  - Creating option {i}: text='{option_text[:30]}...', is_correct={is_correct}, has_image={has_image}")
-                    
-                    if has_text or has_image:
+                    # ALWAYS create option if it has text (even if empty after strip)
+                    # This ensures MCQ options are never lost
+                    if option_text or option_image:
                         Option.objects.create(
                             question=question,
                             option_text=option_text,
@@ -507,6 +497,10 @@ def manage_question(request, question_id):
                             is_correct=bool(is_correct),
                             order=i
                         )
+                        created_count += 1
+                        print(f"  ✓ Created option {i}: '{option_text[:40]}' (correct={is_correct}, has_image={option_image is not None})")
+                
+                print(f"  ✓ Total {created_count} options created for question {question.id}")
                 
                 # Update exam total marks if auto_calculate_total is enabled
                 exam.refresh_from_db()

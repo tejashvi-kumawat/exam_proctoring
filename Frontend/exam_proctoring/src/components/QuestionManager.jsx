@@ -194,18 +194,18 @@ const saveQuestion = async () => {
       return;
     }
     
-    // Check if we need to use FormData (if images are present)
+    // SIMPLIFIED APPROACH: Always use FormData when editing (to handle any image updates)
     const hasQuestionImage = questionForm.question_image instanceof File;
     const hasOptionImages = questionForm.options.some(opt => opt.option_image instanceof File);
     
+    // Use FormData if ANY images are involved
     if (hasQuestionImage || hasOptionImages) {
-      // Use FormData for multipart/form-data
       const formData = new FormData();
       formData.append('exam', selectedExam.id);
       formData.append('question_text', questionForm.question_text.trim());
       formData.append('question_type', questionForm.question_type);
       formData.append('marks', parseInt(questionForm.marks));
-      // Only set order for NEW questions, preserve order for editing
+      
       if (!editingQuestion) {
         formData.append('order', questions.length);
       }
@@ -214,26 +214,21 @@ const saveQuestion = async () => {
         formData.append('question_image', questionForm.question_image);
       }
       
-      // BETTER APPROACH: Send options as JSON string in FormData
-      // This avoids complex FormData parsing on backend
-      const validOptions = questionForm.options.filter(opt => {
-        const hasText = opt.option_text && opt.option_text.toString().trim().length > 0;
-        const hasNewImage = opt.option_image instanceof File;
-        const hasExistingImage = opt.option_image && typeof opt.option_image === 'string' && opt.option_image.length > 0;
-        return hasText || hasNewImage || hasExistingImage;
-      });
-      
-      // Send options metadata as JSON (text and is_correct flags)
-      const optionsMetadata = validOptions.map(opt => ({
-        option_text: opt.option_text || '',
-        is_correct: opt.is_correct,
+      // CRITICAL FIX: Send ALL options, not just valid ones
+      // Filter should ONLY remove completely empty slots
+      const allOptions = questionForm.options.map(opt => ({
+        option_text: (opt.option_text || '').trim(),
+        is_correct: !!opt.is_correct,
         has_existing_image: opt.option_image && typeof opt.option_image === 'string'
-      }));
+      })).filter(opt => 
+        // Only remove if BOTH text is empty AND no image
+        opt.option_text.length > 0 || opt.has_existing_image
+      );
       
-      formData.append('options_json', JSON.stringify(optionsMetadata));
+      formData.append('options_json', JSON.stringify(allOptions));
       
-      // Send new option images separately
-      validOptions.forEach((option, index) => {
+      // Append new option images with indexed keys
+      questionForm.options.forEach((option, index) => {
         if (option.option_image instanceof File) {
           formData.append(`option_image_${index}`, option.option_image);
         }
@@ -249,12 +244,6 @@ const saveQuestion = async () => {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
-      
-      console.log('Question saved successfully:', response.data);
-      console.log('Response options count:', response.data.options?.length);
-      
-      // DON'T refresh immediately - let user see console
-      alert(`Question ${editingQuestion ? 'updated' : 'added'}! Check console for debug info before page refreshes.`);
       
       toast.success(editingQuestion ? 'Question updated successfully' : 'Question added successfully');
       fetchQuestions(selectedExam.id);
@@ -330,24 +319,18 @@ const saveQuestion = async () => {
   };
 
   const editQuestion = (question) => {
-    console.log('Editing question:', question);
-    console.log('Question options:', question.options);
-    
     setEditingQuestion(question);
     
-    // Map existing options properly
-    const mappedOptions = (question.options || []).map(opt => ({
+    // Map ALL existing options exactly as they are
+    const existingOptions = (question.options || []).map(opt => ({
       option_text: opt.option_text || '',
-      is_correct: opt.is_correct || false,
+      is_correct: !!opt.is_correct, // Ensure boolean
       option_image: opt.option_image_url || null
     }));
     
-    console.log('Mapped options:', mappedOptions);
-    
-    // Ensure we have at least 4 option slots
-    const paddedOptions = [...mappedOptions];
-    while (paddedOptions.length < 4) {
-      paddedOptions.push({ option_text: '', is_correct: false, option_image: null });
+    // Pad with empty slots to always have at least 4 options
+    while (existingOptions.length < 4) {
+      existingOptions.push({ option_text: '', is_correct: false, option_image: null });
     }
     
     setQuestionForm({
@@ -355,10 +338,9 @@ const saveQuestion = async () => {
       question_type: question.question_type,
       marks: question.marks,
       question_image: question.question_image_url || null,
-      options: paddedOptions
+      options: existingOptions
     });
     
-    console.log('Question form set with options:', paddedOptions);
     setShowAddQuestion(true);
   };
 

@@ -401,6 +401,12 @@ def manage_question(request, question_id):
             if serializer.is_valid():
                 question = serializer.save()
                 
+                # Store existing option images before deletion (to preserve them)
+                existing_option_images = {}
+                for idx, opt in enumerate(question.options.all().order_by('order')):
+                    if opt.option_image:
+                        existing_option_images[idx] = opt.option_image
+                
                 # Update options
                 question.options.all().delete()  # Remove existing options
                 
@@ -436,8 +442,15 @@ def manage_question(request, question_id):
                     if isinstance(is_correct, str):
                         is_correct = is_correct.lower() in ['true', '1', 'yes']
                     
-                    # Get option image if available
-                    option_image = option_images[i] if i < len(option_images) else None
+                    # Determine option image: new upload > existing image > none
+                    option_image = None
+                    if i < len(option_images):
+                        # New image uploaded for this option
+                        option_image = option_images[i]
+                    elif option_data.get('existing_image_url'):
+                        # Keep existing image (already stored before deletion)
+                        if i in existing_option_images:
+                            option_image = existing_option_images[i]
                     
                     # Only create options with text or image
                     if option_text or option_image:

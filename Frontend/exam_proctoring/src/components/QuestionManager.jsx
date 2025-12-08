@@ -224,9 +224,13 @@ const saveQuestion = async () => {
         formData.append(`options[${index}][option_text]`, option.option_text.trim() || '');
         formData.append(`options[${index}][is_correct]`, option.is_correct ? 'true' : 'false');
         
-        // Only append new image files, not existing URLs
+        // Handle option images
         if (option.option_image instanceof File) {
+          // New image file being uploaded
           formData.append(`option_images`, option.option_image);
+        } else if (option.option_image && typeof option.option_image === 'string') {
+          // Existing image URL - send it so backend can preserve it
+          formData.append(`options[${index}][existing_image_url]`, option.option_image);
         }
       });
       

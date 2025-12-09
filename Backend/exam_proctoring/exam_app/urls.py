@@ -12,6 +12,7 @@ urlpatterns = [
     path('attempts/<int:attempt_id>/results/', views.exam_results, name='exam-results'),
     path('attempts/<int:attempt_id>/pause/', views.pause_exam, name='pause-exam'),
     path('attempts/<int:attempt_id>/resume/', views.resume_exam, name='resume-exam'),
+    path('attempts/<int:attempt_id>/answers/', views.get_attempt_answers, name='get-attempt-answers'),
     path('user/attempts/', views.user_attempts, name='user-attempts'),
     
     # Admin URLs

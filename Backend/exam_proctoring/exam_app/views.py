@@ -677,6 +677,61 @@ def resume_exam(request, attempt_id):
     })
 
 
+# Get saved answers for an in-progress attempt (for page refresh)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_attempt_answers(request, attempt_id):
+    """Get all saved answers for an in-progress exam attempt"""
+    attempt = get_object_or_404(
+        ExamAttempt,
+        id=attempt_id,
+        user=request.user,
+        status__in=['IN_PROGRESS', 'STARTED', 'PAUSED']
+    )
+    
+    # Get all answers for this attempt
+    answers = Answer.objects.filter(attempt=attempt).select_related(
+        'question', 'selected_option'
+    ).prefetch_related('answer_images', 'attachments')
+    
+    answer_data = []
+    for answer in answers:
+        # Get answer images
+        answer_images = []
+        for img in answer.answer_images.all().order_by('order'):
+            answer_images.append({
+                'id': img.id,
+                'image_url': request.build_absolute_uri(img.image.url) if img.image else None,
+                'order': img.order
+            })
+        
+        # Get answer attachments
+        answer_attachments = []
+        for attachment in answer.attachments.all().order_by('uploaded_at'):
+            answer_attachments.append({
+                'id': attachment.id,
+                'file_name': attachment.file_name,
+                'file_type': attachment.file_type,
+                'file_url': request.build_absolute_uri(attachment.file.url) if attachment.file else None,
+                'file_size': attachment.file_size,
+                'uploaded_at': attachment.uploaded_at.isoformat() if attachment.uploaded_at else None
+            })
+        
+        answer_info = {
+            'question_id': answer.question.id,
+            'selected_option_id': answer.selected_option.id if answer.selected_option else None,
+            'answer_text': answer.answer_text,
+            'answer_images': answer_images,
+            'answer_attachments': answer_attachments,
+            'answered_at': answer.answered_at
+        }
+        answer_data.append(answer_info)
+    
+    return Response({
+        'answers': answer_data
+    })
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_attempts(request):

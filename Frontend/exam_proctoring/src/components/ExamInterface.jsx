@@ -241,6 +241,47 @@ const ExamInterface = () => {
               await resumeExam(inProgressAttempt.id);
             }
             setAttempt(inProgressAttempt);
+            
+            // Fetch and load previously saved answers
+            try {
+              const savedAnswersResponse = await api.get(`/exam/attempts/${inProgressAttempt.id}/answers/`);
+              const savedAnswers = savedAnswersResponse.data.answers || [];
+              
+              // Populate answers state
+              const mcqAnswers = {};
+              const textAnswers = {};
+              const imageAnswers = {};
+              const attachments = {};
+              
+              savedAnswers.forEach(answer => {
+                if (answer.selected_option_id) {
+                  // MCQ/MSQ answer
+                  mcqAnswers[answer.question_id] = answer.selected_option_id;
+                }
+                if (answer.answer_text) {
+                  // Text answer
+                  textAnswers[answer.question_id] = answer.answer_text;
+                }
+                if (answer.answer_images && answer.answer_images.length > 0) {
+                  // Image answers
+                  imageAnswers[answer.question_id] = answer.answer_images;
+                }
+                if (answer.answer_attachments && answer.answer_attachments.length > 0) {
+                  // Text answer attachments
+                  attachments[answer.question_id] = answer.answer_attachments;
+                }
+              });
+              
+              setAnswers(mcqAnswers);
+              setAnswerTexts(textAnswers);
+              setAnswerImages(imageAnswers);
+              setAnswerAttachments(attachments);
+              
+            } catch (answerError) {
+              console.error('Error loading saved answers:', answerError);
+              // Continue without saved answers - user can re-answer
+            }
+            
             setLoading(false);
             return;
           } catch (resumeError) {

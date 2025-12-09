@@ -275,6 +275,11 @@
   color: #991b1b;
 }
 
+.exam-status-badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .exam-title {
   margin: 0 60px 8px 0;
   font-size: 18px;

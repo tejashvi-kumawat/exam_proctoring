@@ -265,12 +265,12 @@ const Dashboard = () => {
                   <div className={`exam-status-badge ${
                     isAvailable ? 'available' 
                     : isInProgress ? 'in-progress' 
-                    : isCompleted ? (attempt?.is_passed ? 'passed' : 'failed')
+                    : isCompleted ? (attempt?.results_ready ? (attempt?.is_passed ? 'passed' : 'failed') : 'pending')
                     : ''
                   }`}>
                     {isAvailable ? 'Available' 
                       : isInProgress ? 'In Progress' 
-                      : isCompleted ? (attempt?.is_passed ? 'Passed' : 'Failed')
+                      : isCompleted ? (attempt?.results_ready ? (attempt?.is_passed ? 'Passed' : 'Failed') : 'Pending')
                       : exam.status}
                   </div>
 

@@ -271,11 +271,19 @@ const ExamResults = () => {
         {showComingSoon && (
           <div className="results-coming-soon-banner">
             <Icon name="Clock" size={32} style={{ marginRight: '12px' }} />
-            <div>
+            <div style={{ flex: 1 }}>
               <h3>Results Coming Soon</h3>
               <p>
                 Your exam has been submitted and is being evaluated. Results will be available once the instructor reviews and releases them.
               </p>
+              <button 
+                onClick={() => navigate('/dashboard')} 
+                className="btn btn-primary"
+                style={{ marginTop: '16px' }}
+              >
+                <Icon name="Home" size={16} />
+                Go to Dashboard
+              </button>
             </div>
           </div>
         )}

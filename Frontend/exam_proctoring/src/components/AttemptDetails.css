@@ -1334,7 +1334,7 @@
 .solution-editor-container-attempt {
   margin-top: 20px;
   padding: 16px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 100%);
+  background: #f0f9ff;
   border: 1px solid #dbeafe;
   border-radius: 8px;
   display: flex;
